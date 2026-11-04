@@ -132,6 +132,7 @@ class GameKeys extends EventEmitter {
 
   start() {
     if (this.proc || !this.available()) return;
+    this.startedAt = Date.now();
     const run = this.o.spawn || spawn;
     // Скрипт передаётся через -EncodedCommand (UTF-16LE base64), а stdin остаётся для команд
     const encoded = Buffer.from(PS_SCRIPT, 'utf16le').toString('base64');
@@ -140,11 +141,18 @@ class GameKeys extends EventEmitter {
     this.ready = false;
     p.stdout.on('data', (d) => this.onData(String(d)));
     p.on('exit', () => {
+      // Закрылся, так и не запустившись, — скорее всего PowerShell заблокирован (антивирус, политика)
+      if (!this.ready) this.fails = (this.fails || 0) + 1;
       this.proc = null;
       this.ready = false;
-      for (const q of this.queue.splice(0)) q('FAILED');
+      for (const q of this.queue.splice(0)) q(this.blocked() ? 'BLOCKED' : 'FAILED');
     });
-    p.on('error', () => { this.proc = null; this.ready = false; });
+    p.on('error', () => {
+      this.fails = (this.fails || 0) + 1;
+      this.proc = null;
+      this.ready = false;
+      for (const q of this.queue.splice(0)) q(this.blocked() ? 'BLOCKED' : 'FAILED');
+    });
   }
 
   onData(text) {
@@ -152,7 +160,7 @@ class GameKeys extends EventEmitter {
     const lines = this.buf.split(/\r?\n/);
     this.buf = lines.pop();
     for (const l of lines.map((x) => x.trim()).filter(Boolean)) {
-      if (l === 'READY') { this.ready = true; continue; }
+      if (l === 'READY') { this.ready = true; this.fails = 0; continue; }
       if (l === 'OUTSIDE') { this.emit('outside'); continue; } // не ответ на команду — событие
       const cb = this.queue.shift();
       if (cb) cb(l);
@@ -190,18 +198,26 @@ class GameKeys extends EventEmitter {
 
   // Команда без ответа
   fire(cmd) {
-    if (!this.available()) return;
+    if (!this.available() || this.blocked()) return;
     if (!this.proc) this.start();
     try { this.proc.stdin.write(`${cmd}\n`); } catch { /* процесс закрыт */ }
   }
 
+  // Три запуска подряд закончились ничем — больше не пытаемся, пока программу не перезапустят
+  blocked() {
+    return (this.fails || 0) >= 3;
+  }
+
   send(cmd, timeoutMs) {
     if (!this.available()) return Promise.resolve('UNAVAILABLE');
+    if (this.blocked()) return Promise.resolve('BLOCKED');
     if (!this.proc) this.start();
+    // Первый запуск PowerShell на медленном компьютере может занять несколько секунд
+    const wait = this.ready ? timeoutMs : Math.max(timeoutMs, 10000);
     return new Promise((resolve) => {
       let done = false;
       const finish = (r) => { if (!done) { done = true; resolve(r); } };
-      setTimeout(() => finish('FAILED'), timeoutMs);
+      setTimeout(() => finish('FAILED'), wait);
       this.queue.push(finish);
       try { this.proc.stdin.write(`${cmd}\n`); } catch { finish('FAILED'); }
     });

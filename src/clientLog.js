@@ -103,18 +103,26 @@ class ClientLogWatcher extends EventEmitter {
     if (size < this.pos) this.pos = 0; // файл очистили
     if (size === this.pos) return;
     const len = Math.min(size - this.pos, 4 * 1024 * 1024);
-    const fd = fs.openSync(this.file, 'r');
+    let fd;
     try {
+      // Файл может быть на миг занят игрой или антивирусом — тогда прочитаем в следующий раз
+      fd = fs.openSync(this.file, 'r');
       const chunk = Buffer.alloc(len);
-      fs.readSync(fd, chunk, 0, len, this.pos);
-      this.pos += len;
-      this.buf += chunk.toString('utf8');
+      const got = fs.readSync(fd, chunk, 0, len, this.pos);
+      this.pos += got;
+      this.buf += chunk.subarray(0, got).toString('utf8');
+    } catch {
+      return;
     } finally {
-      fs.closeSync(fd);
+      if (fd !== undefined) try { fs.closeSync(fd); } catch { /* уже закрыт */ }
     }
+    // Очень длинная строка без перевода — не копим бесконечно
+    if (this.buf.length > 1024 * 1024) this.buf = this.buf.slice(-64 * 1024);
     const lines = this.buf.split(/\r?\n/);
     this.buf = lines.pop();
-    for (const line of lines) this.feed(line);
+    for (const line of lines) {
+      try { this.feed(line); } catch (e) { this.emit('error-line', e); }
+    }
   }
 
   feed(line) {

@@ -4,6 +4,8 @@
 // и даём ссылку на страницу релиза.
 'use strict';
 
+const { withTimeout } = require('./store');
+
 const { EventEmitter } = require('events');
 
 const CHECK_EVERY = 4 * 3600_000;
@@ -79,7 +81,7 @@ class Updater extends EventEmitter {
     // Portable: смотрим последний релиз на GitHub
     try {
       this.set({ status: 'checking' });
-      const res = await fetch(`https://api.github.com/repos/${this.o.owner}/${this.o.repo}/releases/latest`, {
+      const res = await withTimeout((u, i) => fetch(u, i), 20000)(`https://api.github.com/repos/${this.o.owner}/${this.o.repo}/releases/latest`, {
         headers: { Accept: 'application/vnd.github+json', 'User-Agent': this.o.userAgent },
       });
       if (!res.ok) throw new Error(String(res.status));

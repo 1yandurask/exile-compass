@@ -51,7 +51,8 @@ class FakeWindow {
     this.opacity = 1;
     this.events = {};
     this.sent = [];
-    this.webContents = { send: (ch, v) => this.sent.push([ch, v]) };
+    this.wcEvents = {};
+    this.webContents = { send: (ch, v) => this.sent.push([ch, v]), on: (ev, fn) => { this.wcEvents[ev] = fn; } };
     created.push(this);
   }
   loadFile(f) { this.file = path.basename(f); }
@@ -67,7 +68,8 @@ class FakeWindow {
   close() { this.closed = true; this.events.closed?.(); }
   isVisible() { return this.visible; }
   isFocused() { return !!this.focusedFlag; }
-  isDestroyed() { return false; }
+  isDestroyed() { return !!this.destroyed; }
+  destroy() { this.destroyed = true; this.visible = false; }
   getBounds() { return this.bounds; }
   setBounds(b) { this.bounds = b; }
 }
@@ -123,8 +125,9 @@ const win = (file) => created.find((w) => w.file === file);
   readyResolve();
   await new Promise((r) => setTimeout(r, 50));
 
-  // Окна созданы заранее и спрятаны, хоткеи по умолчанию на месте
-  assert.ok(win('build.html') && win('quests.html') && win('secrets.html') && win('search.html') && win('toast.html'));
+  // Окно дерева и уведомления созданы заранее и спрятаны, остальные — при первом открытии
+  assert.ok(win('build.html') && win('toast.html'));
+  assert.ok(!win('quests.html') && !win('secrets.html') && !win('search.html'), 'редкие окна не держим в памяти заранее');
   assert.ok(!win('build.html').visible);
   assert.deepEqual([...shortcuts.keys()].sort(), ['Ctrl+D', 'Ctrl+Space', 'F10', 'F6', 'F7', 'F8', 'F9']);
   assert.deepEqual(win('build.html').top, [true, 'screen-saver']);
@@ -401,6 +404,21 @@ const win = (file) => created.find((w) => w.file === file);
   await new Promise((r) => setTimeout(r, 1000));
   assert.ok(!toastsNow().at(-1).some((c) => c.kind === 'xp'), 'выключено — не показываем');
   console.log('✓ штраф опыта при входе в зону; в городе и при выключенном — молчит');
+
+  // Окно упало (видеодрайвер, память): убирается, по клавише создаётся заново, Esc отпускается
+  await call('win:open', null, 'quests');
+  const crashed = created.filter((w) => w.file === 'quests.html').at(-1);
+  assert.ok(crashed.visible && shortcuts.has('Escape'));
+  crashed.wcEvents['render-process-gone']({}, { reason: 'crashed' });
+  assert.ok(crashed.destroyed);
+  assert.ok(!shortcuts.has('Escape'), 'Esc отпущен — упавшее окно не считается открытым');
+  await call('win:open', null, 'quests');
+  const fresh = created.filter((w) => w.file === 'quests.html').at(-1);
+  assert.ok(fresh !== crashed && fresh.visible, 'новое окно вместо упавшего');
+  shortcuts.get('Escape')?.();
+  assert.ok(fs.readFileSync(path.join(tmp, 'error.log'), 'utf8').includes('window quests gone: crashed'), 'причина записана в error.log');
+  console.log('✓ упавшее окно создаётся заново, причина — в error.log');
+
 
   // Перезапуск с обновлением: сначала всё отпускаем, затем установщик в обычном режиме
   const installs = [];

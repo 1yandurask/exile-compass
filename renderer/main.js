@@ -434,7 +434,9 @@
   function render() {
     if (!lib) return;
     renderStatus();
-    renderLeveling();
+    // Пока переименовывают билд — не перерисовываем список, иначе поле ввода потеряет текст и фокус
+    const typing = renaming && document.activeElement?.closest?.('.rename');
+    if (!typing) renderLeveling();
     renderPrice();
     if (!listening) renderKeys();
     renderSettings();

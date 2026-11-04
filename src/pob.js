@@ -1,6 +1,8 @@
 // Импорт билдов Path of Building: код или ссылка → этапы (дерево, камни, уники, самоцветы).
 'use strict';
 
+const { withTimeout } = require('./store');
+
 const zlib = require('zlib');
 const { parseXml, child, childrenOf } = require('./xml');
 
@@ -46,7 +48,7 @@ function looksLikeUrl(s) {
 async function fetchBuildCode(input, userAgent = 'exile-compass') {
   const raw = rawUrlFor(input);
   if (!raw) throw new Error('This site does not share Path of Building codes directly — open the build there and copy the PoB code instead');
-  const res = await fetch(raw, { headers: { 'User-Agent': userAgent } });
+  const res = await withTimeout((u, i) => fetch(u, i), 20000)(raw, { headers: { 'User-Agent': userAgent } });
   if (!res.ok) throw new Error(`The link answered ${res.status} — check that the build is public`);
   const text = (await res.text()).trim();
   if (text.startsWith('<')) {

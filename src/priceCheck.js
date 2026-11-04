@@ -9,6 +9,7 @@ const path = require('path');
 const core = require('../lib/core');
 const rules = require('./rules');
 const { TradeClient, RateLimitError, convert, tradeSiteUrl, CURRENCY_SHORT } = require('./trade');
+const { withTimeout } = require('./store');
 
 // То, что продаётся через обменник у NPC (Currency Exchange), а не на сайте: валюта,
 // гадальные карты и прочие складываемые предметы без своей категории (фрагменты, скарабеи…)
@@ -40,7 +41,7 @@ class PriceCheck {
     this.last = null; // последняя удачная проверка для главного окна: { name, rarity, base, total, listings }
     // Как Awakened PoE Trade: сетевой модуль Electron с обычным User-Agent и cookies сессии
     this.client = new TradeClient({
-      fetch: (url, init) => (globalThis.__priceCheckFetch || net.fetch)(url, { ...init, credentials: 'include' }),
+      fetch: withTimeout((url, init) => (globalThis.__priceCheckFetch || net.fetch)(url, { ...init, credentials: 'include' }), 15000),
       get userAgent() { return app.userAgentFallback; },
     });
     o.gameKeys.on('outside', () => { if (this.visible()) this.hide(); });
@@ -49,17 +50,27 @@ class PriceCheck {
   get s() { return this.o.settings(); }
 
   init() {
+    this.createWindow();
+    this.loadLeagues();
+    // Справочник предметов (~4 МБ) читаем чуть позже — не задерживаем запуск программы.
+    // Если нажали клавишу раньше — загрузится сразу при проверке.
+    const t = setTimeout(() => this.ensureCore(), 3000);
+    t.unref?.();
+  }
+
+  ensureCore() {
+    if (this.coreReady) return;
     core.init(
       fs.readFileSync(path.join(this.o.dataDir, 'en', 'items.ndjson'), 'utf8'),
       fs.readFileSync(path.join(this.o.dataDir, 'en', 'stats.ndjson'), 'utf8'),
     );
-    this.createWindow();
-    this.loadLeagues();
+    this.coreReady = true;
   }
 
   // ------------------------------------------------------------ лиги
 
   async loadLeagues() {
+    this.leaguesLoading = true;
     try {
       this.leagues = await this.client.leagues();
       this.leaguesError = '';
@@ -69,10 +80,18 @@ class PriceCheck {
         this.s.league = (challenge || this.leagues[0])?.id || this.s.league || 'Standard';
         this.o.save();
       }
+      this.leaguesRetry = 0;
     } catch {
       this.leaguesError = 'Could not load leagues from pathofexile.com';
       if (!this.s.league) this.s.league = 'Standard';
+      // Нет интернета или сайт на обслуживании — попробуем ещё раз: через 1, 2, 4… минут (не чаще раза в 15 минут)
+      clearTimeout(this.leaguesTimer);
+      const delay = Math.min(15, 2 ** (this.leaguesRetry || 0)) * 60_000;
+      this.leaguesRetry = (this.leaguesRetry || 0) + 1;
+      this.leaguesTimer = setTimeout(() => this.loadLeagues(), delay);
+      this.leaguesTimer.unref?.();
     }
+    this.leaguesLoading = false;
     this.o.onChange();
   }
 
@@ -131,7 +150,9 @@ class PriceCheck {
       if (r !== 'OK') {
         clipboard.writeText(before);
         if (r === 'NOTGAME') return; // нажали не в игре — ничего не делаем
-        this.show({ error: 'Could not copy the item from the game. If the game runs as administrator, run Exile Compass as administrator too.' });
+        this.show({ error: r === 'BLOCKED'
+          ? 'Windows did not let Exile Compass send keys to the game (PowerShell is blocked, often by an antivirus). Allow Exile Compass in your antivirus and restart it.'
+          : 'Could not copy the item from the game. If the game runs as administrator, run Exile Compass as administrator too.' });
         return;
       }
       const text = await this.readClipboardChange('');
@@ -151,7 +172,16 @@ class PriceCheck {
   }
 
   async checkText(text) {
-    const parsed = core.parseClipboard(text);
+    this.ensureCore();
+    if (!this.leagues.length && !this.leaguesLoading) this.loadLeagues();
+    let parsed;
+    try {
+      parsed = core.parseClipboard(text);
+    } catch (e) {
+      this.o.logError?.('parse item', e);
+      this.show({ error: 'Could not read this item. Only the English game client is supported.' });
+      return this.view();
+    }
     if (!parsed.isOk()) {
       this.show({ error: parsed.error === 'item.unknown' ? 'This item is not known to the price checker.' : 'Could not read this item. Only the English game client is supported.' });
       return this.view();
@@ -161,16 +191,23 @@ class PriceCheck {
       this.show({ error: `${item.info.name} is traded at the Currency Exchange, not on the trade site.`, title: item.info.name });
       return this.view();
     }
-    const preset = rules.presetFor(core, item, {
-      league: this.s.league,
-      merchantOnly: this.s.saleMode !== 'available',
-      collapseListings: 'api',
-      activateStockFilter: false,
-      searchStatRange: 10,
-      useEn: true,
-      currency: undefined,
-    });
-    rules.applyDefaults(item, preset);
+    let preset;
+    try {
+      preset = rules.presetFor(core, item, {
+        league: this.s.league,
+        merchantOnly: this.s.saleMode !== 'available',
+        collapseListings: 'api',
+        activateStockFilter: false,
+        searchStatRange: 10,
+        useEn: true,
+        currency: undefined,
+      });
+      rules.applyDefaults(item, preset);
+    } catch (e) {
+      this.o.logError?.('filters', e);
+      this.show({ error: 'The price checker cannot search for this item.' });
+      return this.view();
+    }
     this.current = { item, preset, body: null, result: null, error: '', checkId: ++this.checks };
     this.show({});
     return this.search({});
@@ -225,7 +262,15 @@ class PriceCheck {
     if (!c?.preset) return this.view();
     rules.applyEdits(c.preset, edits);
     c.preset.filters.trade.league = this.s.league;
-    const body = rules.finalizeRequest(core.createTradeRequest(c.preset.filters, c.preset.stats), c.preset, this.s.saleMode);
+    let body;
+    try {
+      body = rules.finalizeRequest(core.createTradeRequest(c.preset.filters, c.preset.stats), c.preset, this.s.saleMode);
+    } catch (e) {
+      this.o.logError?.('trade request', e);
+      c.error = 'Could not build the search for this item.';
+      this.push();
+      return this.view();
+    }
     c.body = body;
     c.error = '';
     c.wait = 0;
@@ -278,7 +323,7 @@ class PriceCheck {
 
   // Прозрачный слой на весь экран: светлая дымка поверх игры и панель посередине.
   createWindow() {
-    this.win = new BrowserWindow({
+    const win = new BrowserWindow({
       ...this.displayBounds(),
       show: false,
       frame: false,
@@ -290,11 +335,19 @@ class PriceCheck {
       backgroundColor: '#00000000',
       webPreferences: { preload: this.o.preload, contextIsolation: true, sandbox: true, spellcheck: false },
     });
-    this.win.setAlwaysOnTop(true, 'screen-saver');
-    this.win.loadFile(path.join(this.o.rendererDir, 'price.html'));
-    this.win.on('close', (e) => { if (!this.quitting) { e.preventDefault(); this.hide(); } });
+    this.win = win;
+    win.setAlwaysOnTop(true, 'screen-saver');
+    win.loadFile(path.join(this.o.rendererDir, 'price.html'));
+    win.on('close', (e) => { if (!this.quitting) { e.preventDefault(); this.hide(); } });
     // Переключились в другое окно — закрываемся
-    this.win.on('blur', () => { if (this.visible()) this.hide(); });
+    win.on('blur', () => { if (this.visible()) this.hide(); });
+    // Окно упало — создадим заново при следующей проверке
+    win.webContents.on?.('render-process-gone', (_e, d) => {
+      this.o.logError?.('price window gone', d?.reason || 'unknown');
+      try { if (!win.isDestroyed()) win.destroy(); } catch { /* уже нет */ }
+      if (this.win === win) this.win = null;
+      this.o.onVisible(false);
+    });
   }
 
   visible() {
@@ -303,6 +356,7 @@ class PriceCheck {
 
   show(extra) {
     if (extra.error) this.current = { error: extra.error, title: extra.title || '' };
+    if (!this.win || this.win.isDestroyed()) this.createWindow();
     this.win.setBounds(this.displayBounds());
     this.push(extra.error ? { item: extra.title ? { name: extra.title } : null } : {});
     // Мимо панели окно «прозрачно» для мыши: клик проходит в игру. Над панелью — обычное окно

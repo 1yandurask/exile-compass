@@ -20,11 +20,29 @@ const PKG = require('./package.json');
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
+// Любая непредвиденная ошибка — в журнал error.log в папке программы, а не падение программы
+function logError(where, err) {
+  try { require('./src/store').errorLog(app.getPath('userData'))(where, err); } catch { /* не важно */ }
+}
+process.on('uncaughtException', (e) => logError('uncaught', e));
+process.on('unhandledRejection', (e) => logError('unhandled promise', e));
+app.on('child-process-gone', (_e, d) => logError('child process gone', `${d?.type} ${d?.reason} ${d?.exitCode ?? ''}`));
+
+// Окно упало (видеодрайвер, нехватка памяти) — убираем его, при следующем открытии создастся заново
+function onRendererGone(win, name, cleanup) {
+  win.webContents.on?.('render-process-gone', (_e, d) => {
+    logError(`window ${name} gone`, d?.reason || 'unknown');
+    try { if (!win.isDestroyed()) win.destroy(); } catch { /* уже нет */ }
+    cleanup();
+  });
+}
+
 const DATA_DIR = path.join(__dirname, 'data');
 const TREE_VERSION = readJsonSafe(path.join(__dirname, 'data', 'tree.json'))?.version || '';
 function readJsonSafe(f) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } }
 const userFile = (name) => path.join(app.getPath('userData'), name);
-const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
+const store = require('./src/store');
+const readJson = (file, fallback) => store.readJson(file, fallback);
 
 // ---------------------------------------------------------------- настройки
 
@@ -98,9 +116,8 @@ function migrateOld() {
     migratedFrom: [Object.keys(s).length || oldBuilds ? 'PoE Act Guide' : '', price ? 'PoE Price Check' : ''].filter(Boolean),
   };
   try {
-    fs.mkdirSync(app.getPath('userData'), { recursive: true });
-    fs.writeFileSync(userFile('settings.json'), JSON.stringify(merged, null, 2));
-    if (oldBuilds) fs.writeFileSync(userFile('builds.json'), JSON.stringify(oldBuilds));
+    store.writeJson(userFile('settings.json'), merged, true);
+    if (oldBuilds) store.writeJson(userFile('builds.json'), oldBuilds);
   } catch { /* не вышло — начнём с чистого листа */ }
 }
 
@@ -131,14 +148,11 @@ function load() {
 }
 
 function saveSettings() {
-  try {
-    fs.mkdirSync(app.getPath('userData'), { recursive: true });
-    fs.writeFileSync(userFile('settings.json'), JSON.stringify(settings, null, 2));
-  } catch { /* не критично */ }
+  try { store.writeJson(userFile('settings.json'), settings, true); } catch (e) { logError('save settings', e); }
 }
 
 function saveBuilds() {
-  fs.writeFileSync(userFile('builds.json'), JSON.stringify(builds));
+  try { store.writeJson(userFile('builds.json'), builds); } catch (e) { logError('save builds', e); }
 }
 
 function activeBuild() {
@@ -186,9 +200,10 @@ function createOverlay(kind) {
     maximizable: false,
     minimizable: false,
     fullscreenable: false,
-    backgroundColor: '#120e0a',
+    backgroundColor: '#1a1714',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, spellcheck: false },
   });
+  onRendererGone(win, kind, () => { if (wins[kind] === win) delete wins[kind]; syncEscape(); });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setOpacity(conf.opacity);
   win.loadFile(path.join(__dirname, 'renderer', OVERLAYS[kind].file));
@@ -210,7 +225,7 @@ function createOverlay(kind) {
 }
 
 function anyOverlayVisible() {
-  return Object.values(wins).some((w) => !w.isDestroyed() && w.isVisible());
+  return Object.values(wins).some((w) => w && !w.isDestroyed() && w.isVisible());
 }
 
 // Esc перехватываем только пока открыто хотя бы одно окно — иначе он нужен игре
@@ -227,7 +242,7 @@ function closeEverything() {
 }
 
 function showOverlay(kind) {
-  const win = wins[kind] || createOverlay(kind);
+  const win = (wins[kind] && !wins[kind].isDestroyed() && wins[kind]) || createOverlay(kind);
   win.setAlwaysOnTop(true, 'screen-saver');
   win.show();
   win.focus();
@@ -399,6 +414,7 @@ function createToast() {
     hasShadow: false,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, spellcheck: false },
   });
+  onRendererGone(toastWin, 'toast', () => { toastWin = null; });
   toastWin.setAlwaysOnTop(true, 'screen-saver');
   toastWin.setIgnoreMouseEvents(true); // клики проходят в игру
   toastWin.loadFile(path.join(__dirname, 'renderer', 'toast.html'));
@@ -582,6 +598,7 @@ const priceCheck = new PriceCheck({
   dataDir: DATA_DIR,
   onVisible: () => syncEscape(),
   onChange: () => pushLibrary(),
+  logError,
 });
 
 // Выход к выбору персонажа: /exit через чат (Enter → Ctrl+V → Enter), затем в буфере —
@@ -606,6 +623,7 @@ async function exitToCharacterSelect() {
       const why = {
         NOTGAME: 'The game window was not in front — click into the game and press the key again.',
         UNAVAILABLE: 'Sending keys to the game works only on Windows.',
+        BLOCKED: 'Windows did not let Exile Compass send keys to the game (PowerShell is blocked, often by an antivirus). Allow Exile Compass in your antivirus and restart it.',
       }[r] || 'Could not send keys to the game. If the game runs as administrator, run this app as administrator too.';
       showToast([{ kind: 'xp', label: 'Exit to character select', title: 'Did not exit', text: `${why}${search ? ' The search is copied anyway.' : ''}` }]);
     }
@@ -1012,13 +1030,16 @@ function createMainWindow() {
     show: false,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, spellcheck: false },
   });
+  const w = mainWin;
+  onRendererGone(w, 'main', () => { if (mainWin === w) mainWin = null; });
+  w.on('closed', () => { if (mainWin === w) mainWin = null; });
   mainWin.setMenuBarVisibility(false);
   mainWin.loadFile(path.join(__dirname, 'renderer', 'main.html'));
-  mainWin.once('ready-to-show', () => mainWin.show());
+  mainWin.once('ready-to-show', () => { if (!process.argv.includes('--hidden')) mainWin?.show(); });
   mainWin.on('close', (e) => {
     if (quitting) return;
     e.preventDefault();
-    mainWin.hide();
+    hideMain();
     if (!settings.trayHintShown && tray) {
       tray.displayBalloon?.({
         title: 'Exile Compass is still running',
@@ -1030,14 +1051,31 @@ function createMainWindow() {
   });
 }
 
+// Спрятанное главное окно через пару минут закрывается совсем — меньше памяти, пока играешь.
+// Открывается снова по клавише или из трея.
+let mainRelease = null;
+function hideMain() {
+  if (!mainWin || mainWin.isDestroyed()) return;
+  mainWin.hide();
+  clearTimeout(mainRelease);
+  mainRelease = setTimeout(() => {
+    if (quitting || !mainWin || mainWin.isDestroyed() || mainWin.isVisible()) return;
+    const w = mainWin;
+    mainWin = null;
+    try { w.destroy?.(); } catch { /* уже закрыто */ }
+  }, 2 * 60 * 1000);
+  mainRelease.unref?.();
+}
+
 function showMain() {
+  clearTimeout(mainRelease);
   if (!mainWin || mainWin.isDestroyed()) createMainWindow();
   mainWin.show();
   mainWin.focus();
 }
 
 function toggleMain() {
-  if (mainWin && !mainWin.isDestroyed() && mainWin.isVisible() && mainWin.isFocused?.() !== false) mainWin.hide();
+  if (mainWin && !mainWin.isDestroyed() && mainWin.isVisible() && mainWin.isFocused?.() !== false) hideMain();
   else showMain();
 }
 
@@ -1071,12 +1109,14 @@ function createTray() {
 app.on('second-instance', showMain);
 
 app.whenReady().then(() => {
+  app.setAppUserModelId?.('com.exilecompass.app'); // значок и уведомления Windows — от имени программы
   load();
   registerIpc();
   createTray();
   createMainWindow();
-  // Окна создаём заранее и прячем — тогда по клавише они открываются мгновенно
-  for (const kind of Object.keys(OVERLAYS)) createOverlay(kind);
+  // Окно дерева и уведомления создаём заранее — по клавише они открываются мгновенно.
+  // Остальные окна (квесты, секретные комнаты, поиск) — при первом открытии: меньше памяти.
+  createOverlay('build');
   createToast();
   priceCheck.init();
   registerHotkeys();
