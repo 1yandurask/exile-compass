@@ -1,0 +1,70 @@
+{
+  "name": "exile-compass",
+  "productName": "Exile Compass",
+  "version": "1.0.0",
+  "description": "Path of Exile companion over the game: leveling plan from Path of Building (tree, gems, quests, Labyrinth, secret rooms) and price check on a key",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "tree": "node scripts/build-tree.js ../skilltree-export/data.json",
+    "core": "node scripts/build-core.js",
+    "fonts": "node scripts/fetch-fonts.js",
+    "test": "node --test test/*.test.js && node test/e2e-harness.js && node test/e2e-price.js",
+    "dist": "electron-builder --win nsis portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.25.0"
+  },
+  "build": {
+    "appId": "com.exilecompass.app",
+    "productName": "Exile Compass",
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**",
+      "renderer/**",
+      "data/**",
+      "assets/**",
+      "lib/**",
+      "core/apt/LICENSE",
+      "LICENSE-THIRD-PARTY.md"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Exile Compass",
+      "artifactName": "Exile-Compass-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "Exile-Compass-Portable.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "1yandurask",
+      "repo": "exile-compass",
+      "releaseType": "release"
+    },
+    "electronLanguages": [
+      "en-US"
+    ],
+    "compression": "maximum"
+  },
+  "author": "1yandurask",
+  "repository": "github:1yandurask/exile-compass",
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  }
+}

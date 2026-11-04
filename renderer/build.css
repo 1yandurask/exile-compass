@@ -1,0 +1,165 @@
+.stage { display: flex; align-items: center; gap: 4px; margin-left: 10px; }
+.stage button { width: 30px; height: 30px; padding: 0; font-size: 18px; line-height: 1; }
+.stage select {
+  min-width: 170px;
+  height: 30px;
+  font: 600 15px var(--serif);
+  color: var(--text);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+}
+
+/* ---------------------------------------------------------------- дерево */
+
+.tree-area { position: relative; min-width: 0; min-height: 0; }
+#tree { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+#tree.dragging { cursor: grabbing; }
+
+.asc {
+  position: absolute;
+  left: 12px;
+  bottom: 46px;
+  width: 230px;
+  height: 190px;
+  background: rgba(18, 14, 10, .92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.asc-title {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  z-index: 1;
+  font: 600 13px var(--serif);
+  color: var(--gold);
+  pointer-events: none;
+}
+#ascTree { width: 100%; height: 100%; display: block; }
+
+.tree-foot {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+.tree-foot button { pointer-events: auto; margin-left: auto; padding: 3px 10px; }
+#points b { color: var(--text); font-weight: 600; }
+#points em { color: var(--ember); font-style: normal; font-weight: 600; }
+.legend { display: flex; align-items: center; gap: 6px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-left: 6px; }
+.dot.taken { background: #d9b66c; }
+.dot.fresh { background: #f2a44a; box-shadow: 0 0 6px #f2a44a; }
+
+.warn {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  background: rgba(60, 30, 18, .92);
+  border: 1px solid #7a4a2a;
+  border-radius: 6px;
+  color: #f3c9a8;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- боковая панель */
+
+.side {
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  padding: 4px 16px 18px;
+}
+.side section + section { margin-top: 18px; }
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+.side-head select { max-width: 150px; font-size: 12px; }
+h2 { margin: 0; font: 600 17px var(--serif); color: var(--gold); }
+
+.group { padding: 8px 0 10px; border-top: 1px solid var(--line-soft); }
+.group:first-child { border-top: 0; padding-top: 2px; }
+.group-slot { color: var(--faint); font-size: 12px; }
+.gem-main { font-weight: 600; font-size: 15px; margin-top: 1px; }
+.gem-lvl { color: var(--faint); font-weight: 400; font-size: 12px; margin-left: 6px; }
+.supports { list-style: none; margin: 4px 0 0; padding: 0 0 0 10px; border-left: 2px solid var(--line); }
+.supports li { color: var(--muted); padding: 1px 0; }
+
+/* Отметка «куплен» у камней, которые продают в городах */
+.gem-name { flex: 1; min-width: 0; }
+.gem .buy {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  padding: 0 7px;
+  border-radius: 9px;
+  color: var(--faint);
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.gem:hover .buy, .gem .buy:focus-visible, .gem.bought .buy { opacity: 1; }
+.gem.bought .buy { color: #8fd0ee; border-color: rgba(108, 196, 238, .45); }
+.gem.bought .gem-name { opacity: .6; }
+
+/* Цвет камня — точка перед названием, как гнездо в игре */
+.gem { display: flex; align-items: center; gap: 7px; }
+.gem::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6d6355;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5);
+}
+.gem.c-R::before { background: #d8463a; }
+.gem.c-G::before { background: #4fb64a; }
+.gem.c-B::before { background: #4f7fe0; }
+.gem.c-W::before { background: #e8e2d4; }
+.gem-main.c-R { color: #f08a7e; }
+.gem-main.c-G { color: #8fd68a; }
+.gem-main.c-B { color: #93b2f2; }
+.supports .gem.c-R { color: #d9a39b; }
+.supports .gem.c-G { color: #a9cfa5; }
+.supports .gem.c-B { color: #aebfe6; }
+
+.none { color: var(--faint); font-size: 13px; }
+
+/* ---------------------------------------------------------------- подсказка */
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  max-width: 340px;
+  padding: 9px 12px;
+  background: rgba(14, 11, 8, .97);
+  border: 1px solid #5a4a35;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+.tip-name { font: 600 15px var(--serif); color: var(--text); }
+.tip-kind { color: var(--faint); font-size: 12px; }
+.tip-state { font-size: 12px; color: var(--gold); }
+.tip-state.fresh { color: var(--ember); }
+.tip ul { margin: 6px 0 0; padding: 0; list-style: none; color: #9fb3ff; font-size: 13px; }
+.tip li + li { margin-top: 2px; }
+

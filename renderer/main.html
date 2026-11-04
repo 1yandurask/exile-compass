@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Exile Compass</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="top">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2 L22 13 L13 24 L4 13 Z" fill="none" stroke="#e0a84a" stroke-width="2"></path><path d="M13 8 L17 13 L13 18 L9 13 Z" fill="#7fb6e6"></path></svg>
+        Exile Compass
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab" role="tab" data-tab="leveling" id="t-leveling"><span class="lamp"></span>Leveling</button>
+        <button class="tab" role="tab" data-tab="price" id="t-price"><span class="lamp blue"></span>Price check</button>
+        <button class="tab" role="tab" data-tab="keys" id="t-keys">Keys</button>
+        <button class="tab" role="tab" data-tab="settings" id="t-settings">Settings</button>
+      </nav>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText"></span></div>
+    </header>
+    <div class="rail" id="rail"></div>
+
+    <div class="update-bar" id="updateBar" hidden>
+      <span id="updateBarText"></span>
+      <button class="btn primary" type="button" id="updateBarBtn">Restart and update</button>
+    </div>
+
+    <main class="scroll" id="scroll">
+      <!-- ============================================================ Leveling -->
+      <section class="page" id="p-leveling" role="tabpanel" aria-labelledby="t-leveling" hidden>
+        <div class="col-main">
+          <section class="panel" id="hero" aria-labelledby="heroName">
+            <div class="build">
+              <div class="crest" id="crest" aria-hidden="true"></div>
+              <div class="grow">
+                <p class="small" id="heroLead">Playing now</p>
+                <h1 id="heroName"></h1>
+                <p class="hint" id="heroMeta"></p>
+              </div>
+              <div class="hero-btns">
+                <button class="btn primary" type="button" id="openTree">Open the tree <span class="key on-primary" id="treeKey"></span></button>
+                <button class="btn quiet" type="button" id="openQuests">Quests</button>
+                <button class="btn quiet" type="button" id="openSecrets">Secret rooms</button>
+              </div>
+            </div>
+            <div class="stages" id="stages" role="group" aria-label="Stage of the plan"></div>
+            <p class="hint stage-hint">Pick the stage you are on. The tree window shows its new nodes.</p>
+            <div class="hero-tools" id="heroTools">
+              <button class="link-btn" type="button" id="renameActive">Rename</button>
+              <button class="link-btn danger" type="button" id="deleteActive">Delete</button>
+            </div>
+            <div class="rename" id="heroRename" hidden></div>
+          </section>
+
+          <section class="panel empty-build" id="noBuild" hidden>
+            <h1>Add your leveling build</h1>
+            <p class="hint">Paste a Path of Building code or a pobb.in link below. Each tree in it becomes a stage: Act 1, Act 2-3 and so on.</p>
+          </section>
+
+          <section aria-labelledby="otherH" id="otherBox">
+            <h2 id="otherH">Other builds</h2>
+            <ul class="panel list" id="otherBuilds"></ul>
+          </section>
+
+          <form class="add" id="addForm">
+            <label for="code" class="label">Add a build</label>
+            <textarea id="code" rows="2" spellcheck="false" placeholder="Path of Building code or pobb.in link"></textarea>
+            <div class="add-row">
+              <input id="name" placeholder="Name (optional)" maxlength="60" autocomplete="off" aria-label="Build name">
+              <button class="btn" type="submit" id="addBtn">Add build</button>
+            </div>
+            <p class="error" id="addError" hidden></p>
+          </form>
+        </div>
+
+        <aside class="col-side">
+          <section class="panel" aria-labelledby="tipsH">
+            <h2 id="tipsH">Tips over the game</h2>
+            <p class="hint">A small card appears when you enter the area.</p>
+            <div class="switches" id="switches"></div>
+            <p class="hint" id="gemHint"></p>
+            <div class="btn-row">
+              <button class="btn" type="button" id="moveToast">Move the cards</button>
+              <button class="btn quiet" type="button" id="testNotify">Show a test card</button>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="vendorH">
+            <h2 id="vendorH">Vendor search</h2>
+            <p class="hint" id="vendorText"></p>
+            <div class="btn-row">
+              <button class="btn" type="button" id="openSearch">Edit searches</button>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <!-- ============================================================ Price check -->
+      <section class="page" id="p-price" role="tabpanel" aria-labelledby="t-price" hidden>
+        <div class="col-main">
+          <section aria-labelledby="howH">
+            <h1 id="howH" class="how-title">Check a price without leaving the game</h1>
+            <ol class="steps">
+              <li><span class="num">1</span><div><b>Hover an item and press <span id="priceKeyInline"></span></b><p class="hint">Gear, gems, maps, uniques. Currency and cards are traded at the Currency Exchange.</p></div></li>
+              <li><span class="num">2</span><div><b>See the 10 cheapest listings</b><p class="hint">The important properties are already on. Switch any of them, set Min and Max, press Search.</p></div></li>
+              <li><span class="num">3</span><div><b>Click anywhere in the game to close</b><p class="hint">The click still reaches the game, so you keep playing straight away. Esc closes it too.</p></div></li>
+            </ol>
+          </section>
+          <section aria-labelledby="lastH">
+            <h2 id="lastH">Last check</h2>
+            <div class="mini" id="last"></div>
+            <div class="btn-row">
+              <button class="btn" type="button" id="reopen">Open it again</button>
+              <button class="btn quiet" type="button" id="clipboard">Check the item in the clipboard</button>
+            </div>
+            <p class="error" id="clipNote" hidden></p>
+          </section>
+        </div>
+
+        <aside class="col-side">
+          <section class="panel" aria-labelledby="lgH">
+            <h2 id="lgH">League</h2>
+            <label for="league" class="label">Prices come from this league</label>
+            <div class="add-row">
+              <select id="league"></select>
+              <button class="btn quiet" type="button" id="reload">Reload</button>
+            </div>
+            <p class="error" id="leaguesError" hidden></p>
+          </section>
+          <section class="panel" aria-labelledby="slH">
+            <h2 id="slH">Which sellers to show</h2>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="sale" value="securable"><span><b>Instant buyout only</b><span class="small block">You buy without waiting for an answer</span></span></label>
+              <label class="choice"><input type="radio" name="sale" value="available"><span><b>Instant buyout and in person</b><span class="small block">More listings, some sellers need a whisper</span></span></label>
+            </div>
+          </section>
+          <section class="panel key-panel" aria-labelledby="pkH">
+            <h2 id="pkH">Price check key</h2>
+            <span class="key big" id="priceKey"></span>
+            <button class="btn quiet" type="button" id="goKeys">Change</button>
+          </section>
+        </aside>
+      </section>
+
+      <!-- ============================================================ Keys -->
+      <section class="page narrow" id="p-keys" role="tabpanel" aria-labelledby="t-keys" hidden>
+        <div>
+          <h1>Keys</h1>
+          <p class="hint">All keys in one place. Press Change, then the new key. A key that is already taken is not saved.</p>
+        </div>
+        <div id="keyGroups"></div>
+        <p class="warn">A single key without Ctrl or Alt stops working while you type in the game chat.</p>
+      </section>
+
+      <!-- ============================================================ Settings -->
+      <section class="page narrow" id="p-settings" role="tabpanel" aria-labelledby="t-settings" hidden>
+        <h1>Settings</h1>
+
+        <section class="panel setting" aria-labelledby="upH">
+          <div class="what"><h2 id="upH">Updates</h2><p class="hint" id="upText"></p></div>
+          <button class="btn quiet" type="button" id="upCheck">Check now</button>
+        </section>
+
+        <section class="panel setting" aria-labelledby="dcH">
+          <div class="what"><h2 id="dcH">Show in Discord</h2><p class="hint">Your friends see the class, level and area. Needs the Discord app with “Share my activity” on.</p></div>
+          <button class="switch" type="button" id="dcOn" aria-labelledby="dcH"></button>
+          <p class="hint full" id="dcState"></p>
+        </section>
+
+        <section class="panel setting" aria-labelledby="logH">
+          <div class="what"><h2 id="logH">Game log</h2><p class="hint" id="logState"></p></div>
+          <button class="btn quiet" type="button" id="chooseLog">Choose Client.txt</button>
+        </section>
+
+        <section class="panel setting" aria-labelledby="winH">
+          <div class="what"><h2 id="winH">Windows over the game</h2><p class="hint">How see-through each window is. Drag a window by its title to move it.</p></div>
+          <div class="full" id="winSettings"></div>
+        </section>
+
+        <section class="panel setting" aria-labelledby="dmH">
+          <div class="what"><h2 id="dmH">Display mode</h2><p class="hint">Windows can only appear over the game in Windowed Fullscreen. In Path of Exile: Options, Graphics, Display Mode.</p></div>
+        </section>
+
+        <p class="hint migrated" id="migrated" hidden></p>
+        <footer class="foot">
+          Not affiliated with or endorsed by Grinding Gear Games. Passive tree data: official GGG export, tree <span id="treeVer"></span>. Build codes and gem colours from Path of Building. Gem vendors and area map from Exile-Leveling (MIT). Item parsing from Awakened PoE Trade (MIT). Prices from pathofexile.com and poe.ninja. Version <span id="appVer"></span>.
+        </footer>
+      </section>
+    </main>
+
+    <!-- ============================================================ First launch -->
+    <div class="welcome" id="welcome" hidden>
+      <div class="w-card" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+        <aside class="w-side">
+          <div class="brand">
+            <svg width="28" height="28" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2 L22 13 L13 24 L4 13 Z" fill="none" stroke="#e0a84a" stroke-width="2"></path><path d="M13 8 L17 13 L13 18 L9 13 Z" fill="#7fb6e6"></path></svg>
+            Exile Compass
+          </div>
+          <ol class="w-steps" id="wSteps">
+            <li class="w-step"><span class="num">1</span>Display mode</li>
+            <li class="w-step"><span class="num">2</span>Your build</li>
+            <li class="w-step"><span class="num">3</span>League for prices</li>
+          </ol>
+          <div class="w-modes">
+            <div class="mode"><b><span class="lamp"></span>Leveling</b><span class="small">Passive tree, gems, quests and tips right over the game.</span></div>
+            <div class="mode"><b><span class="lamp blue"></span>Price check</b><span class="small">Hover an item, press a key, see what it sells for.</span></div>
+          </div>
+        </aside>
+        <div class="w-main">
+          <p class="small" id="wCount"></p>
+          <h1 id="wTitle"></h1>
+
+          <div id="w1" class="w-body">
+            <p class="hint">Exile Compass shows its windows over the game. That works only in <b>Windowed Fullscreen</b>.</p>
+            <p class="hint">In Path of Exile open Options, Graphics and set Display Mode to Windowed Fullscreen.</p>
+          </div>
+
+          <div id="w2" class="w-body">
+            <p class="hint">Copy the build from Path of Building, or a pobb.in link. Each tree in it becomes a stage: Act 1, Act 2-3 and so on.</p>
+            <label for="wCode" class="label">Build code or link</label>
+            <textarea id="wCode" rows="5" spellcheck="false" placeholder="https://pobb.in/…"></textarea>
+            <p class="error" id="wError" hidden></p>
+            <p class="hint">No build yet? Skip this step. Price check works without one.</p>
+          </div>
+
+          <div id="w3" class="w-body">
+            <p class="hint">Prices come from this league. You can change it later on the Price check tab.</p>
+            <label for="wLeague" class="label">League</label>
+            <select id="wLeague"></select>
+          </div>
+
+          <div class="w-actions">
+            <button class="btn" type="button" id="wBack">Back</button>
+            <span class="grow"></span>
+            <button class="btn" type="button" id="wSkip">Skip</button>
+            <button class="btn primary" type="button" id="wNext"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../src/hotkeys.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

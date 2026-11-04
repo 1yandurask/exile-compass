@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Price check</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="price.css">
+</head>
+<body>
+  <div class="backdrop" id="backdrop">
+  <div class="win" id="panel" role="dialog" aria-label="Price check">
+    <header class="bar">
+      <span class="bar-title">Price check</span>
+      <label class="league no-drag">
+        <span>League</span>
+        <select id="league" aria-label="League"></select>
+      </label>
+      <span class="bar-spacer"></span>
+      <span class="bar-hint">Esc or click outside to close</span>
+      <button class="close no-drag" id="close" aria-label="Close" title="Close (Esc)">×</button>
+    </header>
+
+    <main class="body">
+      <section class="item" id="item" hidden>
+        <div class="item-head">
+          <div class="item-name" id="itemName"></div>
+          <div class="dps" id="dps" hidden></div>
+        </div>
+        <div class="item-meta" id="itemMeta"></div>
+        <div class="highlights" id="highlights" hidden></div>
+        <div class="unknown" id="unknown" hidden></div>
+      </section>
+
+      <p class="error" id="error" hidden></p>
+
+      <section class="filters" id="filters" hidden>
+        <div class="chips" id="itemChips"></div>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <div class="actions" id="actions" hidden>
+        <button class="primary" id="search">Search</button>
+        <span class="wait" id="wait" hidden></span>
+        <span class="bar-spacer"></span>
+        <button id="openTrade">Open on trade site</button>
+      </div>
+
+      <section class="results" id="results" hidden>
+        <div class="results-head" id="resultsHead"></div>
+        <table class="listings">
+          <thead><tr><th class="price">Price</th><th id="gemCol" hidden>Gem</th><th>Listed</th><th>Seller</th></tr></thead>
+          <tbody id="listings"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  </div>
+  <script src="price.js"></script>
+</body>
+</html>

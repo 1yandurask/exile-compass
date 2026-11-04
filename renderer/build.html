@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Build</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="overlay.css">
+  <link rel="stylesheet" href="build.css">
+</head>
+<body>
+  <div class="win">
+    <header class="bar">
+      <span class="bar-title" id="buildName">No build</span>
+      <div class="stage no-drag" id="stageBox" hidden>
+        <button id="prev" aria-label="Previous stage">‹</button>
+        <select id="stageSelect" aria-label="Stage"></select>
+        <button id="next" aria-label="Next stage">›</button>
+      </div>
+      <span class="bar-spacer"></span>
+      <span class="bar-hint">← → stages · Esc closes</span>
+      <button class="close" id="close" aria-label="Close">×</button>
+    </header>
+
+    <div class="empty" id="noBuild">
+      Add a build in the main window: paste a Path of Building code or a pobb.in / pastebin link.
+    </div>
+
+    <main class="body" id="body" hidden>
+      <section class="tree-area">
+        <canvas id="tree"></canvas>
+        <div class="asc" id="ascBox" hidden>
+          <div class="asc-title" id="ascName"></div>
+          <canvas id="ascTree"></canvas>
+        </div>
+        <div class="tree-foot">
+          <span id="points"></span>
+          <span class="legend"><i class="dot taken"></i>taken <i class="dot fresh"></i>new this stage</span>
+          <button id="fit">Fit</button>
+        </div>
+        <div class="warn" id="treeWarn" hidden></div>
+      </section>
+
+      <aside class="side scroll">
+        <section>
+          <div class="side-head">
+            <h2>Gems</h2>
+            <select id="skillSet" aria-label="Gem set" hidden></select>
+          </div>
+          <div id="gems"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="tip" id="tip" hidden></div>
+
+  <script src="../data/tree.js"></script>
+  <script src="tree.js"></script>
+  <script src="build.js"></script>
+</body>
+</html>

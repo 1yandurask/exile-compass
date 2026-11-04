@@ -1,0 +1,202 @@
+/* Окно проверки цены: прозрачный слой на весь экран, светлая дымка поверх игры, панель посередине */
+html, body { overflow: hidden; user-select: none; background: transparent; }
+.backdrop {
+  position: fixed; inset: 0;
+  display: grid; place-items: center;
+  background: rgba(214, 230, 245, .16);
+  animation: haze .12s ease-out;
+}
+@keyframes haze { from { opacity: 0; } }
+.win {
+  display: flex; flex-direction: column;
+  width: min(500px, calc(100vw - 32px));
+  max-height: min(820px, calc(100vh - 64px));
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 10, 20, .55), 0 0 0 1px rgba(0, 0, 0, .4);
+}
+
+.bar {
+  display: flex; align-items: center; gap: 12px;
+  height: 46px; padding: 0 6px 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+.bar-title { font: 700 19px var(--serif); color: var(--accent); white-space: nowrap; }
+.bar-spacer { flex: 1; }
+.league { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.league select { max-width: 190px; padding: 3px 6px; }
+.bar-hint { display: none; }
+.close { width: 40px; height: 40px; padding: 0; font-size: 28px; line-height: 1; background: transparent; border-color: transparent; color: var(--muted); border-radius: 8px; }
+.close:hover { color: #fff; background: rgba(240, 122, 106, .2); border-color: rgba(240, 122, 106, .5); }
+
+.body { flex: 1; overflow-y: auto; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.item-name { font: 700 23px/1.15 var(--serif); }
+.item-name.r-Unique { color: var(--unique); }
+.item-name.r-Rare { color: var(--rare); }
+.item-name.r-Magic { color: var(--magic); }
+.item-name.r-Gem { color: var(--gem); }
+.item-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.unknown { margin-top: 6px; font-size: 12px; color: var(--warn); }
+
+.error { margin: 0; padding: 10px 12px; border: 1px solid rgba(240, 122, 106, .4); border-radius: 8px; background: rgba(240, 122, 106, .08); color: #f6b4aa; }
+
+/* Параметры предмета — плашки */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: 16px;
+  padding: 3px 4px 3px 10px; background: var(--panel);
+  font-size: 13px;
+}
+.chip.off { opacity: .55; }
+.chip.off .chip-label { text-decoration: line-through; text-decoration-color: rgba(142, 163, 184, .6); }
+.chip-label { cursor: pointer; border: 0; background: none; padding: 0; color: var(--text); }
+.chip.on { border-color: rgba(127, 182, 230, .55); background: var(--accent-soft); }
+.chip input { width: 54px; padding: 1px 4px; font-size: 12px; border-radius: 10px; }
+.chip:not(:has(input)) { padding-right: 10px; }
+
+/* Свойства — строки */
+.stats { display: grid; gap: 4px; margin-top: 10px; }
+.stat {
+  /* узкое окно: диапазон — второй строкой под текстом, Min и Max справа */
+  display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; column-gap: 8px; row-gap: 0; align-items: center;
+  padding: 5px 8px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--panel);
+}
+.stat > :nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+.stat > :nth-child(2) { grid-column: 2; grid-row: 1; }
+.stat > :nth-child(3) { grid-column: 2; grid-row: 2; }
+.stat > :nth-child(4) { grid-column: 3; grid-row: 1 / 3; }
+.stat > :nth-child(5) { grid-column: 4; grid-row: 1 / 3; }
+.stat.crafted-res { grid-template-columns: 18px minmax(0, 1fr); }
+.stat.on { border-color: rgba(127, 182, 230, .45); background: linear-gradient(90deg, rgba(127, 182, 230, .10), var(--panel) 60%); }
+.stat.off .stat-text { color: var(--muted); }
+.toggle {
+  width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid #4a4136; background: #16130f;
+  padding: 0; display: grid; place-items: center; font-size: 12px; line-height: 1; color: #0f1a24;
+}
+.stat.on .toggle, .chip.on .toggle { background: var(--accent); border-color: var(--accent); }
+.stat-text { min-width: 0; cursor: pointer; }
+.badge {
+  display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .03em; line-height: 16px; vertical-align: 1px;
+  border: 1px solid currentColor; background: rgba(0, 0, 0, .25);
+}
+/* Цвета пометок — как привычно по игре */
+.b-Corrupted { color: #f06a5a; }
+.b-Shaper { color: #a9c9ff; }
+.b-Elder { color: #c49cff; }
+.b-Crusader { color: #f2e6a6; }
+.b-Hunter { color: #8fdc7a; }
+.b-Redeemer { color: #8fd6ff; }
+.b-Warlord { color: #f0a35a; }
+.b-Eater { color: #a58cff; }
+.b-Exarch { color: #ff8f5a; }
+.b-Fractured { color: #d8b46a; }
+.b-Crafted { color: #9fb4ff; }
+.b-Enchant { color: #7fe0d8; }
+.b-Synthesised { color: #c7a8ff; }
+.b-Implicit { color: var(--muted); }
+.b-Veiled { color: #b98cff; }
+.b-Foulborn, .b-Vestigial, .b-Essence, .b-Delve, .b-Incursion, .b-Scourge { color: var(--muted); }
+.stat-range { font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+.stat-range:empty { display: none; }
+.field { display: inline-flex; align-items: center; gap: 4px; color: var(--faint); font-size: 11.5px; }
+.field input { width: 52px; padding: 2px 5px; font: 13px var(--sans); }
+.stat.off .field input { opacity: .6; }
+
+.actions { display: flex; align-items: center; gap: 10px; }
+.wait { color: var(--warn); font-size: 13px; }
+
+/* Лоты */
+.results-head { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+.listings { width: 100%; border-collapse: collapse; font-size: 13px; }
+.listings th { text-align: left; font-weight: 500; color: var(--faint); font-size: 12px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.listings td { padding: 6px 6px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+.listings tr:nth-child(odd) td { background: rgba(255, 255, 255, .015); }
+.listings .price { width: 40%; }
+.amount { font: 700 15px var(--sans); }
+.cur { color: var(--accent); margin-left: 4px; font-weight: 600; }
+.cur.c-divine { color: #e8c35a; }
+.conv { color: var(--faint); font-size: 11px; margin-left: 8px; }
+.age.fresh { color: var(--warn); }
+.seller { color: var(--muted); overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.same { color: var(--faint); font-size: 11px; margin-left: 4px; }
+.instant { font-size: 10px; color: var(--good); border: 1px solid rgba(127, 214, 164, .4); border-radius: 8px; padding: 0 5px; margin-left: 6px; }
+.empty { color: var(--muted); padding: 10px 0; }
+.searching { color: var(--muted); }
+
+/* Ящик со свойствами сверх первых пяти */
+.drawer { display: contents; }
+.drawer[hidden] { display: none; }
+.drawer-btn {
+  justify-self: start; margin: 2px 0; padding: 5px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: transparent; color: var(--accent);
+  font: 12px var(--sans, inherit); cursor: pointer;
+}
+.drawer-btn:hover { border-color: var(--accent); background: rgba(127, 182, 230, .08); }
+
+/* Камни: уровень, качество, осквернение у каждого лота */
+.gem { white-space: nowrap; font-size: 12px; }
+.gem span { margin-right: 8px; }
+.gem-lv, .gem-q { font-family: var(--mono); color: var(--text); }
+.gem-q { color: #7fe0d8; }
+.gem-c { font-weight: 600; }
+.gem-nc { color: var(--faint); }
+
+/* Заголовок предмета: DPS оружия рядом с названием */
+.item-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.dps { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dps-item {
+  display: inline-flex; align-items: baseline; gap: 6px; padding: 2px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel); font-size: 13px;
+}
+.dps-item b { font: 600 14px var(--mono); }
+.dps-k { color: var(--faint); font-size: 12px; }
+.dps-phys b { color: #e3e3e3; }
+.dps-ele-total { color: var(--text); }
+.dps-parts { display: inline-flex; align-items: baseline; gap: 3px; font-size: 12px; color: var(--faint); }
+.dps-parts::before { content: '('; } .dps-parts::after { content: ')'; }
+.dps-parts b { font-size: 12px; }
+.dps-total b { color: var(--accent); }
+.e-Fire { color: #ff7a59; }
+.e-Cold { color: #6fb6ff; }
+.e-Lightning { color: #f4d54e; }
+/* Особые свойства: доп. стрелы, уровни камней */
+.highlights { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.hl {
+  padding: 2px 9px; border-radius: 6px; font-size: 12.5px; font-weight: 600;
+  color: #c9f0ff; background: rgba(127, 182, 230, .12); border: 1px solid rgba(127, 182, 230, .4);
+}
+
+/* Шторка отдельных сопротивлений под суммой */
+.stat-group { display: grid; gap: 4px; }
+.sub-btn {
+  justify-self: start; margin: -1px 0 0 30px; padding: 1px 9px; border-radius: 999px;
+  border: 1px solid var(--line-soft); background: transparent; color: var(--muted);
+  font-size: 11px; cursor: pointer;
+}
+.sub-btn:hover { color: var(--accent); border-color: var(--accent); }
+.sub-drawer { display: grid; gap: 4px; margin-left: 30px; }
+.sub-drawer[hidden] { display: none; }
+.stat.sub { padding-top: 3px; padding-bottom: 3px; }
+.stat.sub.e-Fire .stat-text { color: #ff9b80; } .stat.sub.e-Cold .stat-text { color: #93c7ff; } .stat.sub.e-Lightning .stat-text { color: #f6df7a; }
+.stat.sub.off .stat-text { opacity: .7; }
+
+/* Сопротивление, которого нет на предмете */
+.stat.absent .stat-text { font-style: normal; }
+.not-on { white-space: nowrap; margin-left: 8px; font-size: 11px; color: var(--faint); }
+
+/* Цвета гнёзд */
+.chip-label.sockets { display: inline-flex; align-items: center; gap: 0; padding: 2px 0; }
+.sock { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .5); box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .35); }
+.sock-link { width: 6px; height: 3px; background: #c9b27a; }
+.sock-gap { width: 7px; }
+.s-R { background: #d9534a; } .s-G { background: #6cc35a; } .s-B { background: #5b8fe8; } .s-W { background: #e8e8e8; }
+.s-A { background: #3a3a3a; border-color: #888; } .s-D { background: #9a7bd0; }
+.chip.off .chip-label.sockets { text-decoration: none; opacity: .75; }

@@ -1,0 +1,6 @@
+/* Шрифты Exile Compass: Alegreya (заголовки) и Alegreya Sans (текст), SIL Open Font License —
+   файлы кладёт scripts/fetch-fonts.js при сборке. Без них — шрифты Windows. */
+@font-face { font-family: "Alegreya"; src: url("fonts/Alegreya.ttf") format("truetype"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/AlegreyaSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/AlegreyaSans-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("fonts/AlegreyaSans-Bold.ttf") format("truetype"); font-weight: 600 700; font-display: swap; }

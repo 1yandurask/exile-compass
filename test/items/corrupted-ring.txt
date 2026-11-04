@@ -1,0 +1,21 @@
+Item Class: Rings
+Rarity: Rare
+Storm Spiral
+Ruby Ring
+--------
+Requirements:
+Level: 30
+--------
+Item Level: 80
+--------
+{ Implicit Modifier — Elemental, Fire, Resistance }
++25(20-30)% to Fire Resistance
+{ Corruption Implicit Modifier — Life }
++8(7-10)% increased maximum Life
+--------
+{ Prefix Modifier "Fecund" (Tier: 4) — Life }
++62(60-69) to maximum Life
+{ Suffix Modifier "of the Rainbow" (Tier: 4) — Elemental, Fire, Cold, Lightning, Resistance }
++11(11-12)% to all Elemental Resistances
+--------
+Corrupted

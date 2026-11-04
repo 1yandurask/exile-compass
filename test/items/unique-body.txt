@@ -1,0 +1,29 @@
+Item Class: Body Armours
+Rarity: Unique
+Shavronne's Wrappings
+Occultist's Vestment
+--------
+Energy Shield: 410 (augmented)
+--------
+Requirements:
+Level: 62
+Int: 180
+--------
+Sockets: B-B-B-B-B-B 
+--------
+Item Level: 83
+--------
+{ Implicit Modifier — Damage, Caster }
+4(3-10)% increased Spell Damage
+--------
+{ Unique Modifier — Defences, Energy Shield }
+139(100-150)% increased Energy Shield
+{ Unique Modifier — Defences, Energy Shield }
+10% faster start of Energy Shield Recharge
+{ Unique Modifier — Elemental, Lightning, Resistance }
++33(30-40)% to Lightning Resistance
+{ Unique Modifier }
+Chaos Damage taken does not bypass Energy Shield
+--------
+Elegance and grace can be
+a robe that hides the dagger.

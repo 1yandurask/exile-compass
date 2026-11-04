@@ -1,0 +1,17 @@
+Item Class: Rings
+Rarity: Rare
+Golem Grip
+Two-Stone Ring
+--------
+Requirements:
+Level: 40
+--------
+Item Level: 82
+--------
+{ Implicit Modifier — Elemental, Cold, Lightning, Resistance }
++14(12-16)% to Cold and Lightning Resistances
+--------
+{ Suffix Modifier "of the Lightning" (Tier: 3) — Elemental, Lightning, Resistance }
++35(30-35)% to Lightning Resistance
+{ Master Crafted Suffix Modifier "of Craft" (Rank: 2) — Chaos, Cold, Resistance }
++12(11-15)% to Cold and Chaos Resistances

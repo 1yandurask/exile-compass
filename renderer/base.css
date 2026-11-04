@@ -1,0 +1,50 @@
+/* Окно цены Exile Compass: общий тёплый тёмный фон, голубой акцент — «цены». */
+:root {
+  --bg: #1a1714;
+  --panel: #211d19;
+  --raise: #2a251f;
+  --line: #3a332b;
+  --line-soft: #2e2822;
+  --text: #ede4d3;
+  --muted: #a89c88;
+  --faint: #8a7f6e;
+  --accent: #7fb6e6;
+  --accent-strong: #7fb6e6;
+  --accent-soft: rgba(127, 182, 230, .12);
+  --good: #9bd4a6;
+  --warn: #f0b45a;
+  --bad: #f07a6a;
+  --unique: #e8955a;
+  --rare: #e8c35a;
+  --magic: #8c9cff;
+  --gem: #4fd1c5;
+  --serif: "Alegreya", Constantia, "Palatino Linotype", Georgia, serif;
+  --sans: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 var(--sans); }
+[hidden] { display: none !important; }
+
+button, select, input { font: inherit; color: var(--text); }
+button {
+  background: var(--raise);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #0f1a24; font-weight: 700; }
+button.primary:hover:not(:disabled) { background: #a9cff0; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+select, input[type=text], input[type=number] {
+  background: #16130f;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 4px 8px;
+}
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; border: 2px solid var(--bg); }

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PathOfBuilding>
+  <Build level="70" targetVersion="3_0" className="Witch" ascendClassName="Necromancer" mainSocketGroup="1" viewMode="TREE"/>
+  <Skills activeSkillSet="1" defaultGemLevel="normalMaximum">
+    <SkillSet id="1" title="Act 1">
+      <Skill slot="Body Armour" enabled="true" mainActiveSkill="1"><Gem nameSpec="Summon Raging Spirit" skillId="SummonRagingSpirit" gemId="Metadata/Items/Gems/SkillGemSummonRagingSpirit" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Damage" skillId="SupportMinionDamage" gemId="Metadata/Items/Gems/SupportGemMinionDamage" level="1" quality="0" enabled="true"/><Gem nameSpec="Melee Splash" skillId="SupportMeleeSplash" gemId="Metadata/Items/Gems/SupportGemMeleeSplash" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Helmet" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Zombie" skillId="RaiseZombie" gemId="Metadata/Items/Gems/SkillGemRaiseZombie" level="1" quality="0" enabled="true"/></Skill>
+      <Skill enabled="true" source="Item:5:Lifesprig"><Gem nameSpec="Granted" skillId="X" enabled="true"/></Skill>
+    </SkillSet>
+    <SkillSet id="2" title="Act 2-3">
+      <Skill slot="Body Armour" enabled="true" mainActiveSkill="1"><Gem nameSpec="Summon Raging Spirit" skillId="SummonRagingSpirit" gemId="Metadata/Items/Gems/SkillGemSummonRagingSpirit" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Damage" skillId="SupportMinionDamage" gemId="Metadata/Items/Gems/SupportGemMinionDamage" level="1" quality="0" enabled="true"/><Gem nameSpec="Melee Splash" skillId="SupportMeleeSplash" gemId="Metadata/Items/Gems/SupportGemMeleeSplash" level="1" quality="0" enabled="true"/><Gem nameSpec="Elemental Damage with Attacks" skillId="SupportElementalDamageWithAttacks" gemId="Metadata/Items/Gems/SupportGemElementalDamageWithAttacks" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Helmet" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Zombie" skillId="RaiseZombie" gemId="Metadata/Items/Gems/SkillGemRaiseZombie" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Life" skillId="SupportMinionLife" gemId="Metadata/Items/Gems/SupportGemMinionLife" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Gloves" enabled="true" mainActiveSkill="1"><Gem nameSpec="Flame Dash" skillId="FlameDash" gemId="Metadata/Items/Gems/SkillGemFlameDash" level="1" quality="0" enabled="true"/><Gem nameSpec="Clarity" skillId="Clarity" gemId="Metadata/Items/Gems/SkillGemClarity" level="1" quality="0" enabled="true"/></Skill>
+      <Skill enabled="true" source="Item:5:Lifesprig"><Gem nameSpec="Granted" skillId="X" enabled="true"/></Skill>
+    </SkillSet>
+    <SkillSet id="3" title="Act 4-5">
+      <Skill slot="Body Armour" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Spectre" skillId="RaiseSpectre" gemId="Metadata/Items/Gems/SkillGemRaiseSpectre" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Damage" skillId="SupportMinionDamage" gemId="Metadata/Items/Gems/SupportGemMinionDamage" level="1" quality="0" enabled="true"/><Gem nameSpec="Spell Echo" skillId="SupportSpellEcho" gemId="Metadata/Items/Gems/SupportGemSpellEcho" level="1" quality="0" enabled="true"/><Gem nameSpec="Elemental Focus" skillId="SupportElementalFocus" gemId="Metadata/Items/Gems/SupportGemElementalFocus" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Helmet" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Zombie" skillId="RaiseZombie" gemId="Metadata/Items/Gems/SkillGemRaiseZombie" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Life" skillId="SupportMinionLife" gemId="Metadata/Items/Gems/SupportGemMinionLife" level="1" quality="0" enabled="true"/><Gem nameSpec="Melee Physical Damage" skillId="SupportMeleePhysicalDamage" gemId="Metadata/Items/Gems/SupportGemMeleePhysicalDamage" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Gloves" enabled="true" mainActiveSkill="1"><Gem nameSpec="Flesh Offering" skillId="FleshOffering" gemId="Metadata/Items/Gems/SkillGemFleshOffering" level="1" quality="0" enabled="true"/><Gem nameSpec="Desecrate" skillId="Desecrate" gemId="Metadata/Items/Gems/SkillGemDesecrate" level="1" quality="0" enabled="true"/></Skill>
+      <Skill enabled="true" source="Item:5:Lifesprig"><Gem nameSpec="Granted" skillId="X" enabled="true"/></Skill>
+    </SkillSet>
+    <SkillSet id="4" title="Act 6-10">
+      <Skill slot="Body Armour" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Spectre" skillId="RaiseSpectre" gemId="Metadata/Items/Gems/SkillGemRaiseSpectre" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Damage" skillId="SupportMinionDamage" gemId="Metadata/Items/Gems/SupportGemMinionDamage" level="1" quality="0" enabled="true"/><Gem nameSpec="Spell Echo" skillId="SupportSpellEcho" gemId="Metadata/Items/Gems/SupportGemSpellEcho" level="1" quality="0" enabled="true"/><Gem nameSpec="Elemental Focus" skillId="SupportElementalFocus" gemId="Metadata/Items/Gems/SupportGemElementalFocus" level="1" quality="0" enabled="true"/><Gem nameSpec="Predator" skillId="SupportPredator" gemId="Metadata/Items/Gems/SupportGemPredator" level="1" quality="0" enabled="true"/><Gem nameSpec="Spell Cascade" skillId="SupportSpellCascade" gemId="Metadata/Items/Gems/SupportGemSpellCascade" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Helmet" enabled="true" mainActiveSkill="1"><Gem nameSpec="Raise Zombie" skillId="RaiseZombie" gemId="Metadata/Items/Gems/SkillGemRaiseZombie" level="1" quality="0" enabled="true"/><Gem nameSpec="Minion Life" skillId="SupportMinionLife" gemId="Metadata/Items/Gems/SupportGemMinionLife" level="1" quality="0" enabled="true"/><Gem nameSpec="Melee Physical Damage" skillId="SupportMeleePhysicalDamage" gemId="Metadata/Items/Gems/SupportGemMeleePhysicalDamage" level="1" quality="0" enabled="true"/><Gem nameSpec="Multistrike" skillId="SupportMultistrike" gemId="Metadata/Items/Gems/SupportGemMultistrike" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Gloves" enabled="true" mainActiveSkill="1"><Gem nameSpec="Flesh Offering" skillId="FleshOffering" gemId="Metadata/Items/Gems/SkillGemFleshOffering" level="1" quality="0" enabled="true"/><Gem nameSpec="Desecrate" skillId="Desecrate" gemId="Metadata/Items/Gems/SkillGemDesecrate" level="1" quality="0" enabled="true"/><Gem nameSpec="Faster Casting" skillId="SupportFasterCast" gemId="Metadata/Items/Gems/SupportGemFasterCast" level="1" quality="0" enabled="true"/></Skill>
+      <Skill slot="Boots" enabled="true" mainActiveSkill="1"><Gem nameSpec="Vaal Haste" skillId="VaalHaste" gemId="Metadata/Items/Gems/SkillGemVaalHaste" level="1" quality="0" enabled="true"/><Gem nameSpec="Flame Dash" skillId="FlameDash" gemId="Metadata/Items/Gems/SkillGemFlameDash" level="1" quality="0" enabled="true"/></Skill>
+      <Skill enabled="true" source="Item:5:Lifesprig"><Gem nameSpec="Granted" skillId="X" enabled="true"/></Skill>
+    </SkillSet>
+  </Skills>
+  <Tree activeSpec="1">
+    <Spec title="Act 1" treeVersion="3_29" classId="3" ascendClassId="3" nodes="54447,8135,11128,11420,4397,36542,37569,57264,3452,22473,10490,47251,7388,60398,31875" masteryEffects="">
+      <URL>https://www.pathofexile.com/passive-skill-tree/AAAA</URL>
+      <Sockets></Sockets>
+    </Spec>
+    <Spec title="Act 2-3" treeVersion="3_29" classId="3" ascendClassId="3" nodes="54447,8135,11128,11420,4397,36542,37569,57264,3452,22473,10490,47251,7388,60398,31875,45067,34907,46092,60090,21973,34306,18359,27203,48362,27929,11659,60791,3554,18574" masteryEffects="">
+      <URL>https://www.pathofexile.com/passive-skill-tree/AAAA</URL>
+      <Sockets></Sockets>
+    </Spec>
+    <Spec title="Act 4-5" treeVersion="3_29" classId="3" ascendClassId="3" nodes="54447,8135,11128,11420,4397,36542,37569,57264,3452,22473,10490,47251,7388,60398,31875,45067,34907,46092,60090,21973,34306,18359,27203,48362,27929,11659,53493,16790,1346,15711,21075,38900,37078,42731,14211,11784,4105,127,27659,8948,26960,25714,45680,60791,3554,18574,11490,60547,36634" masteryEffects="">
+      <URL>https://www.pathofexile.com/passive-skill-tree/AAAA</URL>
+      <Sockets><Socket nodeId="36634" itemId="7"/></Sockets>
+    </Spec>
+    <Spec title="Act 6-10" treeVersion="3_29" classId="3" ascendClassId="3" nodes="54447,8135,11128,11420,4397,36542,37569,57264,3452,22473,10490,47251,7388,60398,31875,45067,34907,46092,60090,21973,34306,18359,27203,48362,27929,11659,53493,16790,1346,15711,21075,38900,37078,42731,14211,11784,4105,127,27659,8948,26960,25714,45680,21602,33911,17849,27611,60554,10835,25237,44788,2348,57565,18033,1006,13191,7614,33479,44955,4184,27163,65203,7503,30225,61982,49047,51517,60791,3554,18574,11490,60547,14603,55646,54159,26298,36634" masteryEffects="">
+      <URL>https://www.pathofexile.com/passive-skill-tree/AAAA</URL>
+      <Sockets><Socket nodeId="36634" itemId="8"/></Sockets>
+    </Spec>
+  </Tree>
+  <Notes>Leveling notes &amp; tips</Notes>
+  <Items activeItemSet="1">
+<Item id="1">Rarity: UNIQUE
+Tabula Rasa
+Simple Robe
+Sockets: W-W-W-W-W-W</Item>
+<Item id="2">Rarity: UNIQUE
+Goldrim
+Leather Cap
++30% to all Elemental Resistances</Item>
+<Item id="3">Rarity: UNIQUE
+Wanderlust
+Wool Shoes</Item>
+<Item id="4">Rarity: RARE
+Doom Grip
+Rawhide Gloves</Item>
+<Item id="5">Rarity: UNIQUE
+Lifesprig
+Driftwood Wand</Item>
+<Item id="6">Rarity: UNIQUE
+Seven-League Step
+Rawhide Boots</Item>
+<Item id="7">Rarity: RARE
+Gale Spark
+Cobalt Jewel
+Unique ID: 1
+Item Level: 70
+Implicits: 0
+{crafted}+12 to Intelligence
+14% increased Minion Damage
+Minions have 8% increased maximum Life</Item>
+<Item id="8">Rarity: UNIQUE
+Watcher's Eye
+Prismatic Jewel
+Variant: Old
+Variant: Current
+Selected Variant: 2
+Limited to: 1
+Implicits: 0
+{variant:1}Old line
+{variant:2}{range:0.5}(4-6)% increased maximum Energy Shield
+Corrupted</Item>
+    <ItemSet id="1" title="Act 1"><Slot name="Weapon 1" itemId="5"/><Slot name="Body Armour" itemId="1"/></ItemSet>
+    <ItemSet id="2" title="Act 2-3"><Slot name="Weapon 1" itemId="5"/><Slot name="Body Armour" itemId="1"/><Slot name="Helmet" itemId="2"/><Slot name="Boots" itemId="3"/><Slot name="Gloves" itemId="4"/></ItemSet>
+    <ItemSet id="3" title="Act 4-5"><Slot name="Body Armour" itemId="1"/><Slot name="Helmet" itemId="2"/><Slot name="Boots" itemId="3"/><Slot name="Gloves" itemId="4"/></ItemSet>
+    <ItemSet id="4" title="Act 6-10"><Slot name="Helmet" itemId="2"/><Slot name="Boots" itemId="6"/><Slot name="Gloves" itemId="4"/></ItemSet>
+  </Items>
+</PathOfBuilding>

@@ -1,0 +1,20 @@
+{
+  "note": "Trials of Ascendancy, in the order you meet them. 'zone' is the exact area name from the game log — it triggers notifications.",
+  "completeLog": [],
+  "completeLogNote": "Regular expressions for Client.txt messages (the text after '] : ') that mean a trial is done. When one matches while you are in a trial area, that trial is ticked automatically. Empty until the exact game message is known.",
+  "entry": "Enter the Labyrinth from Aspirants' Plaza (the large plaque in the Act 3 town) once all six trials of a difficulty are done.",
+  "trials": [
+    { "act": 1, "zone": "The Lower Prison", "trial": "Piercing Truth", "traps": "Spike traps" },
+    { "act": 2, "zone": "The Crypt Level 1", "trial": "Swirling Fear", "traps": "Spinning blades" },
+    { "act": 2, "zone": "The Chamber of Sins Level 2", "trial": "Crippling Grief", "traps": "Sawblades" },
+    { "act": 3, "zone": "The Crematorium", "trial": "Burning Rage", "traps": "Furnace traps" },
+    { "act": 3, "zone": "The Catacombs", "trial": "Lingering Pain", "traps": "Blade sentries" },
+    { "act": 3, "zone": "The Imperial Gardens", "trial": "Stinging Doubt", "traps": "Dart traps" },
+    { "act": 6, "zone": "The Lower Prison", "trial": "Piercing Truth", "traps": "Spike traps" },
+    { "act": 7, "zone": "The Crypt", "trial": "Swirling Fear", "traps": "Spinning blades" },
+    { "act": 7, "zone": "The Chamber of Sins Level 2", "trial": "Crippling Grief", "traps": "Sawblades" },
+    { "act": 8, "zone": "The Bath House", "trial": "Burning Rage", "traps": "Furnace traps" },
+    { "act": 9, "zone": "The Tunnel", "trial": "Lingering Pain", "traps": "Blade sentries" },
+    { "act": 10, "zone": "The Ossuary", "trial": "Stinging Doubt", "traps": "Dart traps" }
+  ]
+}

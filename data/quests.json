@@ -1,0 +1,48 @@
+{
+  "note": "Quests that reward passive skill points (PoE 1, acts 1–10). 'zones' are exact area names from the game log (\"You have entered …\") — they trigger notifications.",
+  "acts": [
+    { "act": 1, "quests": [
+      { "name": "The Dweller of the Deep", "points": 1, "zones": ["The Flooded Depths"], "area": "The Flooded Depths (from The Submerged Passage)", "task": "Kill the Dweller of the Deep", "reward": "Tarkleigh" },
+      { "name": "The Marooned Mariner", "points": 1, "zones": ["The Ship Graveyard Cave", "The Ship Graveyard"], "area": "The Ship Graveyard Cave → The Ship Graveyard", "task": "Take the Allflame, kill Captain Fairgraves", "reward": "Bestel" }
+    ]},
+    { "act": 2, "quests": [
+      { "name": "Through Sacred Ground", "points": 1, "zones": ["The Crypt Level 2"], "area": "The Crypt Level 2 (from The Fellshrine Ruins)", "task": "Take the Golden Hand from the altar", "reward": "Yeena" },
+      { "name": "The Way Forward", "points": 1, "zones": ["The Western Forest"], "area": "The Western Forest", "task": "Kill Captain Arteri, take the Thaumetic Emblem, open the blockade", "reward": "Bestel (Act 1 town)" },
+      { "name": "Deal with the Bandits — kill all three", "points": 2, "zones": ["The Broken Bridge", "The Western Forest", "The Wetlands"], "area": "The Broken Bridge, The Western Forest, The Wetlands", "task": "Kill Kraityn, Alira and Oak", "reward": "Eramir", "tip": "Only killing all three gives passive points. Helping one bandit gives a stat bonus instead." }
+    ]},
+    { "act": 3, "quests": [
+      { "name": "Victario's Secrets", "points": 1, "zones": ["The Sewers"], "area": "The Sewers", "task": "Find all three Platinum Busts", "reward": "Hargan" },
+      { "name": "Piety's Pets", "points": 1, "zones": ["The Lunaris Temple Level 2"], "area": "The Lunaris Temple Level 2", "task": "Kill Piety", "reward": "Grigor" }
+    ]},
+    { "act": 4, "quests": [
+      { "name": "An Indomitable Spirit", "points": 1, "zones": ["The Mines Level 2"], "area": "The Mines Level 2", "task": "Free Deshret's Spirit", "reward": "Tasuni" }
+    ]},
+    { "act": 5, "quests": [
+      { "name": "In Service to Science", "points": 1, "zones": ["The Control Blocks"], "area": "The Control Blocks", "task": "Find the Miasmeter", "reward": "Vilenta" },
+      { "name": "Kitava's Torments", "points": 1, "zones": ["The Reliquary"], "area": "The Reliquary (from The Ruined Square)", "task": "Collect the three Torments", "reward": "Lani" }
+    ]},
+    { "act": 6, "quests": [
+      { "name": "The Father of War", "points": 1, "zones": ["The Karui Fortress"], "area": "The Karui Fortress", "task": "Kill Tukohama", "reward": "Tarkleigh" },
+      { "name": "The Cloven One", "points": 1, "zones": ["Prisoner's Gate", "The Prisoner's Gate"], "area": "The Prisoner's Gate", "task": "Kill Abberath", "reward": "Bestel" },
+      { "name": "The Puppet Mistress", "points": 1, "zones": ["The Wetlands"], "area": "The Wetlands (from The Riverways)", "task": "Kill Ryslatha", "reward": "Tarkleigh" }
+    ]},
+    { "act": 7, "quests": [
+      { "name": "The Master of a Million Faces", "points": 1, "zones": ["The Ashen Fields"], "area": "The Ashen Fields (the Forest Encampment arena)", "task": "Kill Ralakesh", "reward": "Eramir" },
+      { "name": "Queen of Despair", "points": 1, "zones": ["The Dread Thicket"], "area": "The Dread Thicket (from The Northern Forest)", "task": "Kill Gruthkul", "reward": "Eramir" },
+      { "name": "Kishara's Star", "points": 1, "zones": ["The Causeway"], "area": "The Causeway", "task": "Take Kishara's Star", "reward": "Weylam" }
+    ]},
+    { "act": 8, "quests": [
+      { "name": "Love is Dead", "points": 1, "zones": ["The Quay"], "area": "The Quay", "task": "Take the Ankh of Eternity, kill Tolman", "reward": "Clarissa" },
+      { "name": "The Gemling Legion", "points": 1, "zones": ["The Grain Gate"], "area": "The Grain Gate", "task": "Kill the Gemling Legion", "reward": "Maramoa" },
+      { "name": "Reflection of Terror", "points": 1, "zones": ["The High Gardens"], "area": "The High Gardens (from The Bath House)", "task": "Kill Yugul", "reward": "Sin" }
+    ]},
+    { "act": 9, "quests": [
+      { "name": "Queen of the Sands", "points": 1, "zones": ["The Oasis"], "area": "The Oasis (from The Vastiri Desert)", "task": "Kill Shakari", "reward": "Irasha" },
+      { "name": "The Ruler of Highgate", "points": 1, "zones": ["The Quarry"], "area": "The Quarry", "task": "Kill Garukhan", "reward": "Irasha" }
+    ]},
+    { "act": 10, "quests": [
+      { "name": "Vilenta's Vengeance", "points": 1, "zones": ["The Control Blocks"], "area": "The Control Blocks (from The Ravaged Square)", "task": "Kill Vilenta", "reward": "Lani" },
+      { "name": "An End to Hunger", "points": 2, "zones": ["The Feeding Trough"], "area": "The Feeding Trough", "task": "Kill Kitava", "reward": "Lani (Oriath, Epilogue)" }
+    ]}
+  ]
+}

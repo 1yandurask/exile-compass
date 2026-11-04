@@ -1,0 +1,58 @@
+# Сборка программы для Windows на серверах GitHub.
+# Запуск: вкладка Actions → «Build Windows app» → Run workflow.
+# Результат: релиз v<версия из package.json> во вкладке Releases
+# с установщиком и portable-версией.
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build core
+        run: npm run core
+
+      - name: Fetch fonts
+        run: npm run fonts
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npx electron-builder --win nsis portable --x64 --publish never
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Exile Compass ${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          # latest.yml и .blockmap нужны программе для автообновления
+          files: |
+            dist/*.exe
+            dist/latest.yml
+            dist/*.blockmap
+          body: |
+            **Exile-Compass-Setup** — installer, one click.
+            **Exile-Compass-Portable** — no installation.
+
+            If Windows shows "Windows protected your PC", click **More info → Run anyway**.

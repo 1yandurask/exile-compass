@@ -1,0 +1,111 @@
+/* Уведомление поверх игры: жёлтое — квест с очком пассивов, зелёное — испытание Лабиринта,
+   фиолетовое — секретная комната, голубое — камни купить, оранжевое — камень в награду за квест. «near» — подсказка про соседнюю зону. */
+:root {
+  --quest: #e8c35a;
+  --quest-bg: rgba(38, 30, 12, .94);
+  --lab: #6fd08f;
+  --lab-bg: rgba(14, 34, 22, .94);
+  --secret: #b48cf2;
+  --secret-bg: rgba(28, 18, 42, .94);
+  --xp: #f0705a;
+  --xp-bg: rgba(44, 14, 10, .95);
+  --copy: #d9cdb4;
+  --copy-bg: rgba(24, 20, 15, .95);
+  --questgem: #f2a44a;
+  --questgem-bg: rgba(42, 26, 10, .95);
+  --gem: #6cc4ee;
+  --gem-bg: rgba(12, 28, 40, .94);
+  --text: #ede4d3;
+  --muted: #b8a98f;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: transparent;
+  color: var(--text);
+  font: 15px/1.4 "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+.stack { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+
+.card {
+  position: relative;
+  padding: 10px 14px 11px 18px;
+  border-radius: 8px;
+  border: 1px solid;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .55);
+  overflow: hidden;
+  animation: in .35s cubic-bezier(.2, .8, .2, 1) both;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+}
+
+.card.quest { background: var(--quest-bg); border-color: rgba(232, 195, 90, .55); }
+.card.quest::before { background: var(--quest); box-shadow: 0 0 12px var(--quest); }
+.card.quest .label { color: var(--quest); }
+
+.card.lab { background: var(--lab-bg); border-color: rgba(111, 208, 143, .5); }
+.card.lab::before { background: var(--lab); box-shadow: 0 0 12px var(--lab); }
+.card.lab .label { color: var(--lab); }
+
+.card.secret { background: var(--secret-bg); border-color: rgba(180, 140, 242, .5); }
+.card.secret::before { background: var(--secret); box-shadow: 0 0 12px var(--secret); }
+.card.secret .label { color: var(--secret); }
+
+.card.xp { background: var(--xp-bg); border-color: rgba(240, 112, 90, .6); }
+.card.xp::before { background: var(--xp); box-shadow: 0 0 12px var(--xp); }
+.card.xp .label { color: var(--xp); }
+
+.card.copy { background: var(--copy-bg); border-color: rgba(217, 205, 180, .35); }
+.card.copy::before { background: var(--copy); }
+.card.copy .label { color: var(--copy); }
+.card.copy .text { font-family: Consolas, monospace; color: #e8c35a; }
+
+.card.questgem { background: var(--questgem-bg); border-color: rgba(242, 164, 74, .6); }
+.card.questgem::before { background: var(--questgem); box-shadow: 0 0 12px var(--questgem); }
+.card.questgem .label { color: var(--questgem); }
+
+.card.gem { background: var(--gem-bg); border-color: rgba(108, 196, 238, .5); }
+.card.gem::before { background: var(--gem); box-shadow: 0 0 12px var(--gem); }
+.card.gem .label { color: var(--gem); }
+
+/* Соседняя зона: тот же цвет, но пунктир и без заливки полосы — видно, что это «туда», а не «здесь» */
+.card.near { border-style: dashed; background: rgba(16, 13, 9, .92); padding-top: 8px; padding-bottom: 9px; }
+.card.near::before { opacity: .55; box-shadow: none; }
+.card.near .title { font-size: 15px; }
+
+.label { font-size: 12px; font-weight: 600; }
+.title { font: 700 19px "Alegreya", Constantia, "Palatino Linotype", Georgia, serif; margin-top: 1px; }
+.text { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+.stack.out .card { animation: out .3s ease-in both; }
+
+@keyframes in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes out { to { opacity: 0; transform: translateY(-6px); } }
+
+@media (prefers-reduced-motion: reduce) { .card, .stack.out .card { animation: none; } }
+
+/* Окно перетаскивания */
+.positioner .grab { -webkit-app-region: drag; cursor: move; border-style: dashed; }
+.pos-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.pos-actions button {
+  font: 600 14px "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+  background: rgba(30, 24, 17, .95);
+  border: 1px solid #5a4a33;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.pos-actions button.primary { background: #e0a84a; border-color: #e0a84a; color: #22180a; }
+.positioner, .positioner * { user-select: none; }

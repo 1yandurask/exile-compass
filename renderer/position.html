@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Move notifications</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="toast.css">
+</head>
+<body class="positioner">
+  <div class="stack">
+    <div class="card quest grab">
+      <div class="label">Drag this card to where notifications should appear</div>
+      <div class="title">Notifications go here</div>
+      <div class="text">In the lower half of the screen new cards stack upwards.</div>
+    </div>
+    <div class="pos-actions">
+      <button id="save" class="primary">Save position</button>
+      <button id="reset">Default</button>
+      <button id="cancel">Cancel</button>
+    </div>
+  </div>
+  <script src="position.js"></script>
+</body>
+</html>

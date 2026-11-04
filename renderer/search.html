@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Vendor search</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="overlay.css">
+  <link rel="stylesheet" href="lists.css">
+  <link rel="stylesheet" href="search.css">
+</head>
+<body>
+  <div class="win">
+    <header class="bar">
+      <span class="bar-title">Vendor search</span>
+      <span class="bar-spacer"></span>
+      <button class="close" id="close" aria-label="Close">×</button>
+    </header>
+
+    <div class="summary">
+      <span id="hint"></span>
+    </div>
+
+    <main class="scroll list" id="list"></main>
+
+    <form class="s-form" id="form">
+      <div class="s-form-title" id="formTitle">Add your own search</div>
+      <input id="fName" placeholder="Name, e.g. Life + resist ring" maxlength="40" autocomplete="off" spellcheck="false">
+      <div class="s-row">
+        <input id="fText" class="mono" placeholder="Search text or regex" autocomplete="off" spellcheck="false">
+        <span class="s-count" id="fCount">0/50</span>
+      </div>
+      <p class="s-error" id="fError" hidden></p>
+      <div class="s-row s-actions">
+        <button type="button" id="fCancel" class="small" hidden>Cancel</button>
+        <button type="submit" id="fSave" class="small primary">Add</button>
+      </div>
+    </form>
+  </div>
+  <script src="search.js"></script>
+</body>
+</html>
