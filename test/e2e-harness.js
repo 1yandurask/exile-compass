@@ -22,6 +22,9 @@ let clip = '';
 const chatClips = [];
 const pasteClips = [];
 let chatAnswer = 'OK';
+let enters = 0;
+let copyText = '';
+const opened = [];
 globalThis.__actGuideSpawn = () => {
   const { EventEmitter } = require('events');
   const p = new EventEmitter();
@@ -30,7 +33,9 @@ globalThis.__actGuideSpawn = () => {
     write: (s) => {
       const cmd = s.trim();
       if (cmd === 'CHAT') chatClips.push(clip);
+      if (cmd === 'ENTER') enters++;
       if (cmd === 'PASTE') pasteClips.push(clip);
+      if (cmd === 'COPY' && copyText) clip = copyText;
       setTimeout(() => p.stdout.emit('data', `${chatAnswer}\n`), 5);
     },
     end() {},
@@ -100,7 +105,7 @@ const electron = {
     getDisplayNearestPoint: () => DISPLAY,
   },
   net: { fetch: async () => ({ ok: false, status: 503, headers: { get: () => null }, json: async () => ({ result: [] }), text: async () => '{}' }) },
-  shell: { openExternal() {} },
+  shell: { openExternal: async (u) => { opened.push(u); } },
   Tray: class { setToolTip() {} setContextMenu() {} on() {} destroy() { trayDestroyed = true; } },
   Menu: { buildFromTemplate: () => ({}) },
   nativeImage: { createFromPath: () => ({}) },
@@ -129,7 +134,7 @@ const win = (file) => created.find((w) => w.file === file);
   assert.ok(win('build.html') && win('toast.html'));
   assert.ok(!win('quests.html') && !win('secrets.html') && !win('search.html'), 'редкие окна не держим в памяти заранее');
   assert.ok(!win('build.html').visible);
-  assert.deepEqual([...shortcuts.keys()].sort(), ['Ctrl+D', 'Ctrl+Space', 'F10', 'F6', 'F7', 'F8', 'F9']);
+  assert.deepEqual([...shortcuts.keys()].sort(), ['Alt+F', 'Ctrl+D', 'Ctrl+Space', 'F10', 'F6', 'F7', 'F8', 'F9']);
   assert.deepEqual(win('build.html').top, [true, 'screen-saver']);
   console.log('✓ окна поверх игры созданы, клавиши F6–F10 перехвачены');
 
@@ -364,25 +369,68 @@ const win = (file) => created.find((w) => w.file === file);
   assert.deepEqual(savedS.custom, []);
   console.log('✓ строки поиска: копирование кликом и клавишей, свои строки, предел 50 символов');
 
-  // Выход к выбору персонажа: по умолчанию клавиши нет; назначили — /exit в чат, потом строка поиска в буфере
-  assert.equal((await call('lib:get')).hotkeys.logout, '');
-  await call('hotkey:set', null, 'logout', 'F11');
+  // Relog: по умолчанию клавиши нет; назначили — /exit в чат, строка поиска в буфере;
+  // второе нажатие на экране выбора — Enter (одно нажатие — одно действие)
+  assert.equal((await call('lib:get')).hotkeys.relog, '');
+  await call('hotkey:set', null, 'relog', 'F11');
   press('F6');
   assert.ok(win('build.html').visible);
   press('F11');
   await new Promise((r) => setTimeout(r, 450));
   assert.deepEqual(chatClips, ['/exit'], 'в момент нажатий в буфере команда');
+  assert.equal(enters, 0, 'Enter сам по себе не нажимается');
   assert.ok(!win('build.html').visible, 'окна убраны, чтобы фокус был у игры');
   const selText = (await call('search:list')).items.find((x) => x.id === 'auto:all').text;
   assert.equal(clip, selText, 'после выхода в буфере выбранная строка поиска');
-  assert.equal(toastsNow().at(-1)[0].label, 'Exit to character select · search copied');
+  assert.equal(toastsNow().at(-1)[0].label, 'Relog · search copied');
+  assert.equal(toastsNow().at(-1)[0].title, 'Press F11 again to enter the game');
+  press('F11');
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(enters, 1, 'второе нажатие на экране выбора — Enter');
+  assert.deepEqual(chatClips, ['/exit'], 'второй раз /exit не отправляется');
+  press('F11');
+  await new Promise((r) => setTimeout(r, 450));
+  assert.deepEqual(chatClips, ['/exit', '/exit'], 'после входа — снова выход');
+  log('[DEBUG Client 7] Generating level 17 area "1_2_9" with seed 70');
+  log('[INFO Client 7] : You have entered The Western Forest.');
+  await new Promise((r) => setTimeout(r, 900));
+  press('F11');
+  await new Promise((r) => setTimeout(r, 450));
+  assert.equal(enters, 1, 'вошли в зону — нажатие снова выходит, а не жмёт Enter');
+  assert.deepEqual(chatClips, ['/exit', '/exit', '/exit']);
+  log('[DEBUG Client 7] Generating level 17 area "1_2_9" with seed 71');
+  log('[INFO Client 7] : You have entered The Western Forest.');
+  await new Promise((r) => setTimeout(r, 900));
   chatAnswer = 'NOTGAME';
   clip = '';
   press('F11');
   await new Promise((r) => setTimeout(r, 300));
   assert.equal(clip, selText, 'не вышли, но строку всё равно скопировали');
   assert.match(toastsNow().at(-1)[0].text, /game window was not in front/);
-  console.log('✓ бинд выхода: /exit через чат, затем строка поиска в буфере; без окна игры — не выходит');
+  press('F11');
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(enters, 1, 'не вышли — следующее нажатие не жмёт Enter');
+  chatAnswer = 'OK';
+  console.log('✓ relog: /exit, затем второе нажатие — Enter на экране выбора; после входа в зону — снова выход');
+
+  // Alt+F: предмет под курсором копируется и открывается на сайте Exile Forge, буфер возвращается
+  assert.equal((await call('lib:get')).hotkeys.forge, 'Alt+F');
+  copyText = 'Item Class: Helmets\nRarity: Rare\nDoom Visor\nHubris Circlet\n--------\nItem Level: 86';
+  clip = 'было в буфере';
+  press('Alt+F');
+  await new Promise((r) => setTimeout(r, 300));
+  assert.equal(opened.length, 1);
+  const forgeUrl = new URL(opened[0]);
+  assert.equal(forgeUrl.origin + forgeUrl.pathname, 'https://1yandurask.github.io/exile-forge/');
+  const forgeText = require('zlib').inflateRawSync(Buffer.from(forgeUrl.hash.replace('#item=', ''), 'base64url')).toString('utf8');
+  assert.equal(forgeText, copyText);
+  assert.equal(clip, 'было в буфере');
+  copyText = '';
+  press('Alt+F');
+  await new Promise((r) => setTimeout(r, 900));
+  assert.equal(opened.length, 1, 'без предмета сайт не открывается');
+  assert.equal(toastsNow().at(-1)[0].title, 'No item under the cursor');
+  console.log('✓ Alt+F: предмет открывается в Exile Forge, буфер обмена возвращается');
 
   // Штраф опыта: персонаж 30 уровня (последнее повышение — Marauder 70 выше; задаём явно)
   log('[INFO Client 7] : Hero (Witch) is now level 30');

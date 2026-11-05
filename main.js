@@ -55,14 +55,15 @@ const OVERLAYS = {
 // Клавиши-действия без своего окна
 const ACTIONS = {
   copy: { title: 'Paste selected search' },
-  logout: { title: 'Exit to character select' },
+  relog: { title: 'Relog' },
   price: { title: 'Price check' },
+  forge: { title: 'Open in Exile Forge' },
   main: { title: 'Open Exile Compass' },
 };
 const keyTitle = (k) => (OVERLAYS[k] || ACTIONS[k])?.title || k;
 
 const DEFAULTS = {
-  hotkeys: { build: 'F6', quests: 'F7', secrets: 'F8', search: 'F9', copy: 'F10', logout: '', price: 'Ctrl+D', main: 'Ctrl+Space' },
+  hotkeys: { build: 'F6', quests: 'F7', secrets: 'F8', search: 'F9', copy: 'F10', relog: '', price: 'Ctrl+D', forge: 'Alt+F', main: 'Ctrl+Space' },
   price: { league: '', saleMode: 'securable' }, // saleMode: securable — мгновенный выкуп; available — и лично
   welcomed: false, // первый запуск пройден
   windows: { build: { opacity: 0.96 }, quests: { opacity: 0.94 }, secrets: { opacity: 0.94 }, search: { opacity: 0.96 } },
@@ -136,12 +137,17 @@ function load() {
     searches: { ...DEFAULTS.searches, ...(s.searches || {}), custom: Array.isArray(s.searches?.custom) ? s.searches.custom : [] },
     windows: Object.fromEntries(Object.keys(OVERLAYS).map((k) => [k, { ...DEFAULTS.windows[k], ...(s.windows?.[k] || {}) }])),
   };
+  // «Exit to character select» стала «Relog»
+  if (s.hotkeys?.logout && !s.hotkeys.relog) settings.hotkeys.relog = s.hotkeys.logout;
+  delete settings.hotkeys.logout;
   // Новые клавиши (проверка цены, главное окно) не отбирают клавишу, уже занятую раньше
   for (const kind of ['price', 'main']) {
     const accel = settings.hotkeys[kind];
     if (accel && Object.entries(settings.hotkeys).some(([k, a]) => k !== kind && a === accel && !['price', 'main'].includes(k))) settings.hotkeys[kind] = '';
   }
   if (settings.hotkeys.price && settings.hotkeys.price === settings.hotkeys.main) settings.hotkeys.main = '';
+  // Alt+F (Exile Forge) появилась позже всех — уступает любой уже занятой клавише
+  if (settings.hotkeys.forge && Object.entries(settings.hotkeys).some(([k, a]) => k !== 'forge' && a === settings.hotkeys.forge)) settings.hotkeys.forge = '';
   // Раньше по умолчанию была выбрана строка 4-link — теперь общая
   if (settings.searches.selected === 'auto:4link') settings.searches.selected = 'auto:all';
   builds = readJson(userFile('builds.json'), []);
@@ -604,8 +610,25 @@ const priceCheck = new PriceCheck({
 // Выход к выбору персонажа: /exit через чат (Enter → Ctrl+V → Enter), затем в буфере —
 // выбранная строка поиска. Вставка, а не набор по буквам: так не мешает русская раскладка.
 let exiting = false;
-async function exitToCharacterSelect() {
+// Relog: первое нажатие — /exit (выход к выбору персонажа), второе нажатие на экране выбора — Enter
+// (вход тем же персонажем). Одно нажатие клавиши — одно действие, как требуют правила игры для макросов:
+// Enter сам по себе программа не нажимает.
+const RELOG_WINDOW_MS = 90 * 1000; // сколько после /exit второе нажатие считается входом
+let relogAt = 0; // когда отправили /exit; 0 — не на экране выбора
+
+async function relog() {
   if (exiting) return;
+  if (relogAt && Date.now() - relogAt < RELOG_WINDOW_MS) {
+    exiting = true;
+    try {
+      const r = await gameKeys.enter();
+      if (r === 'OK') relogAt = 0;
+      else showToast([{ kind: 'xp', label: 'Relog', title: 'Did not enter the game', text: keysFailText(r) }]);
+    } finally {
+      exiting = false;
+    }
+    return;
+  }
   exiting = true;
   try {
     const sel = searchList();
@@ -618,25 +641,71 @@ async function exitToCharacterSelect() {
     await new Promise((res) => setTimeout(res, r === 'OK' ? 250 : 0));
     if (search) clipboard.writeText(search.text);
     if (r === 'OK') {
-      if (search && settings.notify.copy) showToast([{ kind: 'copy', label: 'Exit to character select · search copied', title: search.name, text: search.text }]);
+      relogAt = Date.now();
+      // Подсказка: второе нажатие на экране выбора — вход; заодно строка поиска, если она скопирована
+      showToast([{
+        kind: 'copy',
+        label: search ? 'Relog · search copied' : 'Relog',
+        title: `Press ${settings.hotkeys.relog || 'the key'} again to enter the game`,
+        text: search && settings.notify.copy ? search.text : '',
+      }]);
     } else {
-      const why = {
-        NOTGAME: 'The game window was not in front — click into the game and press the key again.',
-        UNAVAILABLE: 'Sending keys to the game works only on Windows.',
-        BLOCKED: 'Windows did not let Exile Compass send keys to the game (PowerShell is blocked, often by an antivirus). Allow Exile Compass in your antivirus and restart it.',
-      }[r] || 'Could not send keys to the game. If the game runs as administrator, run this app as administrator too.';
-      showToast([{ kind: 'xp', label: 'Exit to character select', title: 'Did not exit', text: `${why}${search ? ' The search is copied anyway.' : ''}` }]);
+      showToast([{ kind: 'xp', label: 'Relog', title: 'Did not exit', text: `${keysFailText(r)}${search ? ' The search is copied anyway.' : ''}` }]);
     }
   } finally {
     exiting = false;
   }
 }
 
+function keysFailText(r) {
+  return {
+    NOTGAME: 'The game window was not in front — click into the game and press the key again.',
+    UNAVAILABLE: 'Sending keys to the game works only on Windows.',
+    BLOCKED: 'Windows did not let Exile Compass send keys to the game (PowerShell is blocked, often by an antivirus). Allow Exile Compass in your antivirus and restart it.',
+  }[r] || 'Could not send keys to the game. If the game runs as administrator, run this app as administrator too.';
+}
+
 function runAction(kind) {
   if (kind === 'copy') pasteSearch();
-  if (kind === 'logout') exitToCharacterSelect();
+  if (kind === 'relog') relog();
   if (kind === 'price') priceCheck.check();
+  if (kind === 'forge') openInForge();
   if (kind === 'main') toggleMain();
+}
+
+// Alt+F: скопировать предмет под курсором и открыть его на сайте Exile Forge (помощник по крафту).
+// Текст предмета уходит в адресе после «#», а эта часть адреса на сервер не отправляется.
+const FORGE_URL = process.env.EXILE_FORGE_URL || 'https://1yandurask.github.io/exile-forge/';
+let forging = false;
+
+function forgeLink(text) {
+  return `${FORGE_URL}#item=${require('zlib').deflateRawSync(Buffer.from(text, 'utf8')).toString('base64url')}`;
+}
+
+async function openInForge() {
+  if (forging) return;
+  forging = true;
+  try {
+    const before = clipboard.readText();
+    clipboard.writeText('');
+    const r = await gameKeys.copyItem();
+    if (r !== 'OK') {
+      clipboard.writeText(before);
+      if (r !== 'NOTGAME') showToast([{ kind: 'xp', label: 'Exile Forge', title: 'Could not copy the item', text: keysFailText(r) }]);
+      return;
+    }
+    const text = await priceCheck.readClipboardChange('');
+    clipboard.writeText(before);
+    if (!text) {
+      showToast([{ kind: 'xp', label: 'Exile Forge', title: 'No item under the cursor', text: 'Hover an item in the game and press the key again.' }]);
+      return;
+    }
+    await shell.openExternal(forgeLink(text));
+  } catch (e) {
+    logError('forge', e);
+  } finally {
+    forging = false;
+  }
 }
 
 function pushSearches() {
@@ -645,6 +714,7 @@ function pushSearches() {
 }
 
 function onZone({ zone, level, areaId, prevAreaId }) {
+  relogAt = 0; // вошли в игру — следующее нажатие relog снова выходит
   logState.lastZone = zone;
   playing.area = zone;
   playing.act = AREAS[areaId]?.act ?? null;

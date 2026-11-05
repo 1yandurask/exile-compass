@@ -2,6 +2,7 @@
 // (без сторонних библиотек), запускается один раз, поэтому команды уходят без задержки.
 // - COPY  — Ctrl+Alt+C: расширенное копирование предмета под курсором (проверка цены)
 // - CHAT  — Enter → Ctrl+V → Enter: команда чата из буфера (/exit)
+// - ENTER — Enter: вход персонажем с экрана выбора (второе нажатие клавиши relog)
 // - PASTE — Ctrl+F → Ctrl+A → Ctrl+V: строка поиска у торговца (только интерфейс)
 // - WATCH x0 y0 x1 y1 / UNWATCH — сообщить «OUTSIDE» о клике левой кнопкой мимо прямоугольника
 // - FOCUS — вернуть фокус окну игры
@@ -98,6 +99,14 @@ public static class CompassKeys {
     Tap(0x0D);
     return "OK";
   }
+
+  // Enter — на экране выбора персонажа: войти выбранным персонажем
+  public static string Enter() {
+    if (!InGame()) return "NOTGAME";
+    Release();
+    Tap(0x0D);
+    return "OK";
+  }
 }
 '@
 [Console]::Out.WriteLine('READY')
@@ -107,6 +116,7 @@ while ($true) {
   $p = $line.Split(' ')
   if ($line -eq 'COPY') { [Console]::Out.WriteLine([CompassKeys]::Copy()) }
   elseif ($line -eq 'CHAT') { [Console]::Out.WriteLine([CompassKeys]::Chat()) }
+  elseif ($line -eq 'ENTER') { [Console]::Out.WriteLine([CompassKeys]::Enter()) }
   elseif ($line -eq 'PASTE') { [Console]::Out.WriteLine([CompassKeys]::Paste()) }
   elseif ($p[0] -eq 'WATCH') { [CompassKeys]::Watch([int]$p[1], [int]$p[2], [int]$p[3], [int]$p[4]) }
   elseif ($line -eq 'UNWATCH') { [CompassKeys]::Unwatch() }
@@ -170,6 +180,11 @@ class GameKeys extends EventEmitter {
   // Отправить в чат игры то, что сейчас лежит в буфере обмена. → 'OK' | 'NOTGAME' | 'FAILED' | 'UNAVAILABLE'
   chat(timeoutMs = 3000) {
     return this.send('CHAT', timeoutMs);
+  }
+
+  // Нажать Enter в окне игры (вход персонажем с экрана выбора)
+  enter(timeoutMs = 3000) {
+    return this.send('ENTER', timeoutMs);
   }
 
   // Вставить буфер обмена в поле поиска открытого окна торговца

@@ -14,7 +14,7 @@ The app reads the game's log file (`Client.txt`) and shows its own windows. It s
 
 - the price check key sends `Ctrl+Alt+C` so the game copies the hovered item;
 - the vendor search key pastes your search string into the vendor's search box;
-- the exit key types `/exit` in the chat.
+- the relog key types `/exit` in the chat; pressed again on the character select screen, it presses Enter.
 
 It does not read game memory, modify the game client or automate gameplay. You are responsible for following Grinding Gear Games' Terms of Use and the trade site's rules, including its request limits.
 

@@ -28,7 +28,7 @@ Hover an item, press a key, see what it sells for.
 - 🗝️ **Secret rooms** — where they are and how to get in.
 - 🔔 **Tips as you play** — a small card when you enter an area with a passive point quest, a trial or a secret room, a hint for the next area, gems to take or buy in town, and a warning when the area level costs you XP.
 - 🔎 **Vendor search** — ready-made search strings for links, movement speed and +1 gem weapons for your class; one key pastes it into the vendor's search box.
-- 🚪 **Exit to character select** — one key sends `/exit`.
+- 🚪 **Relog** — one press sends `/exit`; press it again on the character select screen to enter the game.
 
 ## Price check
 
@@ -44,6 +44,7 @@ Hover an item, press a key, see what it sells for.
 
 ## And also
 
+- ⚒️ **Crafting helper** — hover an item and press `Alt+F`: it opens in [Exile Forge](https://1yandurask.github.io/exile-forge/) in your browser, with the next crafting step, its chance and average cost.
 - 🎮 **Discord** — shows your class or ascendancy, level and area in your profile.
 - ⌨️ **All keys in one place** — the Keys tab; `Ctrl+Space` opens the main window.
 - 🔄 **Updates itself** — new versions install on restart.
@@ -67,8 +68,9 @@ Prefer no installer? Grab the **[portable version](https://github.com/1yandurask
 | `F9` | Vendor search strings |
 | `F10` | Paste the selected search into the vendor's search box |
 | `Ctrl+D` | Price check the item under the cursor |
+| `Alt+F` | Open the item under the cursor in Exile Forge (crafting helper) |
 | `Ctrl+Space` | Open Exile Compass |
-| — | Exit to character select (set your own key) |
+| — | Relog: `/exit`, then press again to enter the game (set your own key) |
 | `Esc` | Close any open window |
 
 All of them can be changed on the Keys tab.

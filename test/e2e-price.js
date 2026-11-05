@@ -71,7 +71,7 @@ const DISPLAY = { id: 1, bounds: { x: 0, y: 0, width: 1920, height: 1080 }, work
 fs.mkdirSync(path.join(tmp, 'PoE Price Check'), { recursive: true });
 fs.writeFileSync(path.join(tmp, 'PoE Price Check', 'settings.json'), JSON.stringify({ hotkey: 'Ctrl+D', mainHotkey: 'Ctrl+Space', league: '', saleMode: 'securable' }));
 fs.mkdirSync(path.join(tmp, 'PoE Act Guide'), { recursive: true });
-fs.writeFileSync(path.join(tmp, 'PoE Act Guide', 'settings.json'), JSON.stringify({ hotkeys: { build: 'F6', search: 'Ctrl+D' }, logPath: path.join(tmp, 'no-Client.txt') }));
+fs.writeFileSync(path.join(tmp, 'PoE Act Guide', 'settings.json'), JSON.stringify({ hotkeys: { build: 'F6', search: 'Ctrl+D', logout: 'F12' }, logPath: path.join(tmp, 'no-Client.txt') }));
 fs.writeFileSync(path.join(tmp, 'PoE Act Guide', 'builds.json'), '[]');
 
 const electron = {
@@ -143,6 +143,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   assert.deepEqual(m.migratedFrom, ['PoE Act Guide', 'PoE Price Check']);
   assert.equal(m.welcomed, true, 'уже пользовались — первый запуск не показываем');
   assert.equal(m.hotkeys.search, 'Ctrl+D', 'клавиша из Act Guide осталась');
+  assert.equal(m.hotkeys.relog, 'F12', 'клавиша «выход к выбору персонажа» перешла в relog');
+  assert.ok(!('logout' in m.hotkeys));
   assert.equal(m.hotkeys.price, '', 'у проверки цены та же клавиша — не отбираем, пусть выберут другую');
   await call('hotkey:set', 'search', 'F9');
   m = await call('hotkey:set', 'price', 'Ctrl+D');

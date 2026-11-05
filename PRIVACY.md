@@ -21,6 +21,7 @@ Builds, settings, keys, window positions, the price check league and ticks (ques
 - **pathofexile.com (Grinding Gear Games).** To list leagues and to search the official trade site when you check an item. The search contains the item's properties and the filters you chose. GGG receives a normal web request (your IP address and the app's browser identifier) and may set its usual cookies.
 - **poe.ninja.** For currency rates (chaos / divine equivalents).
 - **GitHub.** To check for and download updates.
+- **Exile Forge (1yandurask.github.io, hosted by GitHub).** Only when you press the Exile Forge key (`Alt+F` by default). The app opens the site in your browser with the item's text in the part of the link after `#`. Browsers do not send that part to the server: the item is read by the page on your computer. GitHub receives a normal page request from your browser.
 
 Those sites' own privacy policies apply. No other connections are made.
 

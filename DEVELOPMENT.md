@@ -36,7 +36,7 @@ Exile Compass — это PoE Act Guide и PoE Price Check в одной прог
 
 - `main.js` — основной процесс: настройки, клавиши (одна таблица `settings.hotkeys`, проверка столкновений), окна прокачки, уведомления, Discord, обновления, трей.
 - `src/priceCheck.js` — проверка цены: окно цены, поиск на сайте торговли (`src/trade.js`), правила фильтров (`src/rules.js`), ядро разбора `lib/core.js`.
-- `src/keys.js` — один процесс PowerShell на все нажатия: COPY (Ctrl+Alt+C), CHAT (/exit), PASTE (поиск у торговца), WATCH/UNWATCH (клик мимо окна цены), FOCUS (вернуть фокус игре).
+- `src/keys.js` — один процесс PowerShell на все нажатия: COPY (Ctrl+Alt+C), CHAT (/exit), ENTER (вход с экрана выбора — второе нажатие relog), PASTE (поиск у торговца), WATCH/UNWATCH (клик мимо окна цены), FOCUS (вернуть фокус игре).
 - `renderer/main.*` — главное окно: вкладки Leveling, Price check, Keys, Settings и первый запуск.
 - Первый запуск: если в `%APPDATA%` есть папки `PoE Act Guide` и `PoE Price Check`, оттуда переносятся билды и настройки (`migrateOld` в `main.js`). Клавиши проверки цены и главного окна не отбирают клавишу, уже занятую раньше — тогда они остаются пустыми, их выбирают на вкладке Keys.
 - Discord: используется то же приложение Discord, что было у PoE Act Guide. Чтобы в профиле было написано Exile Compass, переименуйте приложение в Discord Developer Portal.
@@ -98,7 +98,7 @@ src/gems.js             какие камни купить в этом горо�
 src/discord.js          показ класса и уровня в профиле Discord
 src/xp.js               штраф опыта
 src/searches.js         строки поиска у торговца
-src/keys.js             нажатия в игру для команды /exit
+src/keys.js             нажатия в игру: relog, поиск у торговца, проверка цены
 renderer/build.*        окно билда
 renderer/tree.js        отрисовка дерева
 renderer/quests.*       квесты и Лабиринт
