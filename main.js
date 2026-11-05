@@ -57,13 +57,12 @@ const ACTIONS = {
   copy: { title: 'Paste selected search' },
   relog: { title: 'Relog' },
   price: { title: 'Price check' },
-  forge: { title: 'Open in Exile Forge' },
   main: { title: 'Open Exile Compass' },
 };
 const keyTitle = (k) => (OVERLAYS[k] || ACTIONS[k])?.title || k;
 
 const DEFAULTS = {
-  hotkeys: { build: 'F6', quests: 'F7', secrets: 'F8', search: 'F9', copy: 'F10', relog: '', price: 'Ctrl+D', forge: 'Alt+F', main: 'Ctrl+Space' },
+  hotkeys: { build: 'F6', quests: 'F7', secrets: 'F8', search: 'F9', copy: 'F10', relog: '', price: 'Ctrl+D', main: 'Ctrl+Space' },
   price: { league: '', saleMode: 'securable' }, // saleMode: securable — мгновенный выкуп; available — и лично
   welcomed: false, // первый запуск пройден
   windows: { build: { opacity: 0.96 }, quests: { opacity: 0.94 }, secrets: { opacity: 0.94 }, search: { opacity: 0.96 } },
@@ -146,8 +145,8 @@ function load() {
     if (accel && Object.entries(settings.hotkeys).some(([k, a]) => k !== kind && a === accel && !['price', 'main'].includes(k))) settings.hotkeys[kind] = '';
   }
   if (settings.hotkeys.price && settings.hotkeys.price === settings.hotkeys.main) settings.hotkeys.main = '';
-  // Alt+F (Exile Forge) появилась позже всех — уступает любой уже занятой клавише
-  if (settings.hotkeys.forge && Object.entries(settings.hotkeys).some(([k, a]) => k !== 'forge' && a === settings.hotkeys.forge)) settings.hotkeys.forge = '';
+  // Клавиша из прошлых тестовых сборок больше не существует
+  delete settings.hotkeys.forge;
   // Раньше по умолчанию была выбрана строка 4-link — теперь общая
   if (settings.searches.selected === 'auto:4link') settings.searches.selected = 'auto:all';
   builds = readJson(userFile('builds.json'), []);
@@ -669,43 +668,7 @@ function runAction(kind) {
   if (kind === 'copy') pasteSearch();
   if (kind === 'relog') relog();
   if (kind === 'price') priceCheck.check();
-  if (kind === 'forge') openInForge();
   if (kind === 'main') toggleMain();
-}
-
-// Alt+F: скопировать предмет под курсором и открыть его на сайте Exile Forge (помощник по крафту).
-// Текст предмета уходит в адресе после «#», а эта часть адреса на сервер не отправляется.
-const FORGE_URL = process.env.EXILE_FORGE_URL || 'https://1yandurask.github.io/exile-forge/';
-let forging = false;
-
-function forgeLink(text) {
-  return `${FORGE_URL}#item=${require('zlib').deflateRawSync(Buffer.from(text, 'utf8')).toString('base64url')}`;
-}
-
-async function openInForge() {
-  if (forging) return;
-  forging = true;
-  try {
-    const before = clipboard.readText();
-    clipboard.writeText('');
-    const r = await gameKeys.copyItem();
-    if (r !== 'OK') {
-      clipboard.writeText(before);
-      if (r !== 'NOTGAME') showToast([{ kind: 'xp', label: 'Exile Forge', title: 'Could not copy the item', text: keysFailText(r) }]);
-      return;
-    }
-    const text = await priceCheck.readClipboardChange('');
-    clipboard.writeText(before);
-    if (!text) {
-      showToast([{ kind: 'xp', label: 'Exile Forge', title: 'No item under the cursor', text: 'Hover an item in the game and press the key again.' }]);
-      return;
-    }
-    await shell.openExternal(forgeLink(text));
-  } catch (e) {
-    logError('forge', e);
-  } finally {
-    forging = false;
-  }
 }
 
 function pushSearches() {

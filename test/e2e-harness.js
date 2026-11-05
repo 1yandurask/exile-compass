@@ -23,8 +23,6 @@ const chatClips = [];
 const pasteClips = [];
 let chatAnswer = 'OK';
 let enters = 0;
-let copyText = '';
-const opened = [];
 globalThis.__actGuideSpawn = () => {
   const { EventEmitter } = require('events');
   const p = new EventEmitter();
@@ -35,7 +33,6 @@ globalThis.__actGuideSpawn = () => {
       if (cmd === 'CHAT') chatClips.push(clip);
       if (cmd === 'ENTER') enters++;
       if (cmd === 'PASTE') pasteClips.push(clip);
-      if (cmd === 'COPY' && copyText) clip = copyText;
       setTimeout(() => p.stdout.emit('data', `${chatAnswer}\n`), 5);
     },
     end() {},
@@ -105,7 +102,7 @@ const electron = {
     getDisplayNearestPoint: () => DISPLAY,
   },
   net: { fetch: async () => ({ ok: false, status: 503, headers: { get: () => null }, json: async () => ({ result: [] }), text: async () => '{}' }) },
-  shell: { openExternal: async (u) => { opened.push(u); } },
+  shell: { openExternal() {} },
   Tray: class { setToolTip() {} setContextMenu() {} on() {} destroy() { trayDestroyed = true; } },
   Menu: { buildFromTemplate: () => ({}) },
   nativeImage: { createFromPath: () => ({}) },
@@ -134,7 +131,7 @@ const win = (file) => created.find((w) => w.file === file);
   assert.ok(win('build.html') && win('toast.html'));
   assert.ok(!win('quests.html') && !win('secrets.html') && !win('search.html'), 'редкие окна не держим в памяти заранее');
   assert.ok(!win('build.html').visible);
-  assert.deepEqual([...shortcuts.keys()].sort(), ['Alt+F', 'Ctrl+D', 'Ctrl+Space', 'F10', 'F6', 'F7', 'F8', 'F9']);
+  assert.deepEqual([...shortcuts.keys()].sort(), ['Ctrl+D', 'Ctrl+Space', 'F10', 'F6', 'F7', 'F8', 'F9']);
   assert.deepEqual(win('build.html').top, [true, 'screen-saver']);
   console.log('✓ окна поверх игры созданы, клавиши F6–F10 перехвачены');
 
@@ -412,25 +409,6 @@ const win = (file) => created.find((w) => w.file === file);
   assert.equal(enters, 1, 'не вышли — следующее нажатие не жмёт Enter');
   chatAnswer = 'OK';
   console.log('✓ relog: /exit, затем второе нажатие — Enter на экране выбора; после входа в зону — снова выход');
-
-  // Alt+F: предмет под курсором копируется и открывается на сайте Exile Forge, буфер возвращается
-  assert.equal((await call('lib:get')).hotkeys.forge, 'Alt+F');
-  copyText = 'Item Class: Helmets\nRarity: Rare\nDoom Visor\nHubris Circlet\n--------\nItem Level: 86';
-  clip = 'было в буфере';
-  press('Alt+F');
-  await new Promise((r) => setTimeout(r, 300));
-  assert.equal(opened.length, 1);
-  const forgeUrl = new URL(opened[0]);
-  assert.equal(forgeUrl.origin + forgeUrl.pathname, 'https://1yandurask.github.io/exile-forge/');
-  const forgeText = require('zlib').inflateRawSync(Buffer.from(forgeUrl.hash.replace('#item=', ''), 'base64url')).toString('utf8');
-  assert.equal(forgeText, copyText);
-  assert.equal(clip, 'было в буфере');
-  copyText = '';
-  press('Alt+F');
-  await new Promise((r) => setTimeout(r, 900));
-  assert.equal(opened.length, 1, 'без предмета сайт не открывается');
-  assert.equal(toastsNow().at(-1)[0].title, 'No item under the cursor');
-  console.log('✓ Alt+F: предмет открывается в Exile Forge, буфер обмена возвращается');
 
   // Штраф опыта: персонаж 30 уровня (последнее повышение — Marauder 70 выше; задаём явно)
   log('[INFO Client 7] : Hero (Witch) is now level 30');

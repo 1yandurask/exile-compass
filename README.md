@@ -44,7 +44,6 @@ Hover an item, press a key, see what it sells for.
 
 ## And also
 
-- ⚒️ **Crafting helper** — hover an item and press `Alt+F`: it opens in [Exile Forge](https://1yandurask.github.io/exile-forge/) in your browser, with the next crafting step, its chance and average cost.
 - 🎮 **Discord** — shows your class or ascendancy, level and area in your profile.
 - ⌨️ **All keys in one place** — the Keys tab; `Ctrl+Space` opens the main window.
 - 🔄 **Updates itself** — new versions install on restart.
@@ -68,7 +67,6 @@ Prefer no installer? Grab the **[portable version](https://github.com/1yandurask
 | `F9` | Vendor search strings |
 | `F10` | Paste the selected search into the vendor's search box |
 | `Ctrl+D` | Price check the item under the cursor |
-| `Alt+F` | Open the item under the cursor in Exile Forge (crafting helper) |
 | `Ctrl+Space` | Open Exile Compass |
 | — | Relog: `/exit`, then press again to enter the game (set your own key) |
 | `Esc` | Close any open window |

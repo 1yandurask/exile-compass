@@ -252,16 +252,15 @@
       ['search', 'Vendor search', 'Opens the list of search strings'],
       ['copy', 'Paste the search into the vendor', 'Works while the vendor window is open'],
     ] },
-    { title: 'Items', lamp: 'lamp blue', keys: [
+    { title: 'Price check', lamp: 'lamp blue', keys: [
       ['price', 'Check the price of the item under the cursor', ''],
-      ['forge', 'Open the item in Exile Forge', 'Crafting helper in the browser: next step, chance and cost'],
     ] },
     { title: 'In the game and in the app', lamp: '', keys: [
       ['relog', 'Relog', 'First press: /exit to character select. Press again there to enter the game'],
       ['main', 'Open this window', ''],
     ] },
   ];
-  const CLEARABLE = new Set(['quests', 'secrets', 'search', 'copy', 'relog', 'forge']);
+  const CLEARABLE = new Set(['quests', 'secrets', 'search', 'copy', 'relog']);
 
   function renderKeys() {
     $('keyGroups').replaceChildren(...KEY_GROUPS.map((g) => {
