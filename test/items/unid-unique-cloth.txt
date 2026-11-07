@@ -1,0 +1,10 @@
+Item Class: Belts
+Rarity: Unique
+Cloth Belt
+--------
+Item Level: 73
+--------
+{ Implicit Modifier }
+19(15-25)% increased Stun and Block Recovery
+--------
+Unidentified

@@ -1,0 +1,13 @@
+Item Class: Body Armours
+Rarity: Unique
+Occultist's Vestment
+--------
+Energy Shield: 147
+--------
+Requirements:
+Level: 62
+Int: 180
+--------
+Item Level: 83
+--------
+Unidentified

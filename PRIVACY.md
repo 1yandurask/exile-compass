@@ -20,6 +20,7 @@ Builds, settings, keys, window positions, the price check league and ticks (ques
 - **Build links.** When you paste a pobb.in, pastebin.com or poe.ninja link, the app downloads that build. Only the link you pasted is requested.
 - **pathofexile.com (Grinding Gear Games).** To list leagues and to search the official trade site when you check an item. The search contains the item's properties and the filters you chose. GGG receives a normal web request (your IP address and the app's browser identifier) and may set its usual cookies.
 - **poe.ninja.** For currency rates (chaos / divine equivalents).
+- **web.poecdn.com (Grinding Gear Games).** Pictures of uniques when you check an unidentified unique and choose which one it is. Only the pictures are downloaded; nothing about you or your item is sent.
 - **GitHub.** To check for and download updates.
 
 Those sites' own privacy policies apply. No other connections are made.

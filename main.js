@@ -16,6 +16,8 @@ const { xpCard } = require('./src/xp');
 const searches = require('./src/searches');
 const { GameKeys } = require('./src/keys');
 const { PriceCheck } = require('./src/priceCheck');
+// Окно открыто: есть и видно
+const isOpen = (w) => !!w && !w.isDestroyed() && w.isVisible();
 const PKG = require('./package.json');
 
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -136,6 +138,7 @@ function load() {
     searches: { ...DEFAULTS.searches, ...(s.searches || {}), custom: Array.isArray(s.searches?.custom) ? s.searches.custom : [] },
     windows: Object.fromEntries(Object.keys(OVERLAYS).map((k) => [k, { ...DEFAULTS.windows[k], ...(s.windows?.[k] || {}) }])),
   };
+  delete settings.obs; // настройка OBS из прошлых версий больше не нужна
   // «Exit to character select» стала «Relog»
   if (s.hotkeys?.logout && !s.hotkeys.relog) settings.hotkeys.relog = s.hotkeys.logout;
   delete settings.hotkeys.logout;
@@ -230,7 +233,7 @@ function createOverlay(kind) {
 }
 
 function anyOverlayVisible() {
-  return Object.values(wins).some((w) => w && !w.isDestroyed() && w.isVisible());
+  return Object.values(wins).some(isOpen);
 }
 
 // Esc перехватываем только пока открыто хотя бы одно окно — иначе он нужен игре
@@ -254,19 +257,23 @@ function showOverlay(kind) {
   syncEscape();
 }
 
+function hideWin(win) {
+  if (win && !win.isDestroyed()) win.hide();
+}
+
 function hideOverlay(kind) {
-  wins[kind]?.hide();
+  hideWin(wins[kind]);
   syncEscape();
 }
 
 function hideAllOverlays() {
-  for (const k of Object.keys(wins)) wins[k]?.hide();
+  for (const k of Object.keys(wins)) hideWin(wins[k]);
   syncEscape();
 }
 
 function toggleOverlay(kind) {
   const win = wins[kind];
-  if (win && win.isVisible()) hideOverlay(kind);
+  if (isOpen(win)) hideOverlay(kind);
   else showOverlay(kind);
 }
 
@@ -319,7 +326,8 @@ function buildState() {
 function pushBuildState() {
   pushSearches();
   const w = wins.build;
-  if (w && !w.isDestroyed()) w.webContents.send('state', buildState());
+  const st = buildState();
+  if (w && !w.isDestroyed()) w.webContents.send('state', st);
 }
 
 function libraryView() {
@@ -496,6 +504,7 @@ function toastDuration(cards) {
 function showToast(cards) {
   if (!cards.length) return;
   if (!toastWin || toastWin.isDestroyed()) createToast();
+  toastWin.setIgnoreMouseEvents(true); // клики проходят в игру
   placeToast(30 + cards.length * 96);
   toastWin.webContents.send('toast', { cards });
   toastWin.showInactive(); // не забираем фокус у игры
@@ -503,7 +512,7 @@ function showToast(cards) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     toastWin?.webContents.send('toast-hide');
-    toastTimer = setTimeout(() => toastWin?.hide(), 350);
+    toastTimer = setTimeout(() => hideWin(toastWin), 350);
   }, toastDuration(cards));
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "exile-compass",
   "productName": "Exile Compass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Path of Exile companion over the game: leveling plan from Path of Building (tree, gems, quests, Labyrinth, secret rooms) and price check on a key",
   "main": "main.js",
   "private": true,

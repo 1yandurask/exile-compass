@@ -60,6 +60,11 @@ class FakeWindow {
   loadFile(f) { this.file = path.basename(f); }
   setAlwaysOnTop(v, level) { this.top = [v, level]; }
   setOpacity(v) { this.opacity = v; }
+  setSkipTaskbar(v) { this.skip = v; }
+  getOpacity() { return this.opacity; }
+  setFocusable(v) { this.focusable = v; }
+  getMinimumSize() { return this.min || [0, 0]; }
+  setMinimumSize(w, h) { this.min = [w, h]; }
   setMenuBarVisibility() {}
   once() {} focus() {}
   on(ev, fn) { this.events[ev] = fn; }

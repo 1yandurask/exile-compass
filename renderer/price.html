@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
-  <title>Price check</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' https://web.poecdn.com">
+  <title>Exile Compass · Price check</title>
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="price.css">
@@ -29,11 +29,24 @@
           <div class="dps" id="dps" hidden></div>
         </div>
         <div class="item-meta" id="itemMeta"></div>
+        <div class="unique-pick" id="uniqueNote" hidden>
+          <span>You picked this unique for an unidentified item.</span>
+          <button type="button" id="changeUnique">Choose another</button>
+        </div>
         <div class="highlights" id="highlights" hidden></div>
         <div class="unknown" id="unknown" hidden></div>
       </section>
 
       <p class="error" id="error" hidden></p>
+
+      <section class="pick" id="pick" hidden aria-label="Which unique is it?">
+        <div class="pick-head">
+          <span class="pick-title" id="pickTitle">Which unique is it?</span>
+          <input type="search" id="pickFilter" placeholder="Filter by name" aria-label="Filter uniques by name" hidden>
+        </div>
+        <div class="pick-grid" id="pickGrid"></div>
+        <p class="pick-empty" id="pickEmpty" hidden>No unique with this name on this base.</p>
+      </section>
 
       <section class="filters" id="filters" hidden>
         <div class="chips" id="itemChips"></div>

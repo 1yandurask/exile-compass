@@ -83,6 +83,13 @@ public static class CompassKeys {
     Key(0x11, true); Key(0x12, true); Tap(0x43); Key(0x12, false); Key(0x11, false);
     return "OK";
   }
+  // Ctrl+C — обычное копирование: если Ctrl+Alt+C ничего не скопировал (у неопознанных предметов)
+  public static string CopyPlain() {
+    if (!InGame()) return "NOTGAME";
+    Release();
+    Ctrl(0x43);
+    return "OK";
+  }
   // Ctrl+F — курсор в поле поиска, Ctrl+A — выделить старое, Ctrl+V — вставить из буфера
   public static string Paste() {
     if (!InGame()) return "NOTGAME";
@@ -115,6 +122,7 @@ while ($true) {
   if ($line -eq $null) { break }
   $p = $line.Split(' ')
   if ($line -eq 'COPY') { [Console]::Out.WriteLine([CompassKeys]::Copy()) }
+  elseif ($line -eq 'COPYPLAIN') { [Console]::Out.WriteLine([CompassKeys]::CopyPlain()) }
   elseif ($line -eq 'CHAT') { [Console]::Out.WriteLine([CompassKeys]::Chat()) }
   elseif ($line -eq 'ENTER') { [Console]::Out.WriteLine([CompassKeys]::Enter()) }
   elseif ($line -eq 'PASTE') { [Console]::Out.WriteLine([CompassKeys]::Paste()) }
@@ -195,6 +203,11 @@ class GameKeys extends EventEmitter {
   // Скопировать предмет под курсором (Ctrl+Alt+C). → 'OK' | 'NOTGAME' | 'FAILED' | 'UNAVAILABLE'
   copyItem(timeoutMs = 3000) {
     return this.send('COPY', timeoutMs);
+  }
+
+  // Обычное копирование (Ctrl+C) — запасной путь, когда расширенное ничего не дало
+  copyItemPlain(timeoutMs = 3000) {
+    return this.send('COPYPLAIN', timeoutMs);
   }
 
   // Следить за кликом мимо панели (прямоугольник в экранных пикселях) — придёт событие 'outside'

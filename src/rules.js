@@ -163,6 +163,9 @@ function applyDefaults(item, preset) {
   for (const inf of f.influences || []) inf.disabled = false;
   if (f.searchRelaxed) f.searchRelaxed.disabled = true; // искать ту же базу
   if (f.corrupted) f.corrupted.exact = true;
+  // Неопознанный уник, выбранный в списке: по умолчанию цена этого уника вообще (опознанные лоты тоже),
+  // «только неопознанные» — плашкой
+  if (f.unidentified && item.rarity === 'Unique' && item.info?.unique) f.unidentified.disabled = true;
   return preset;
 }
 
@@ -242,6 +245,9 @@ function chipsFor(item, preset) {
   if (f.corrupted) {
     out.push({ id: 'corrupted', kind: 'item', label: f.corrupted.value ? 'Corrupted' : 'Not corrupted', enabled: f.corrupted.exact !== false, fields: false });
   }
+  if (f.unidentified && item.rarity === 'Unique') {
+    out.push({ id: 'unidentified', kind: 'item', label: 'Unidentified only', enabled: !f.unidentified.disabled, fields: false });
+  }
   const totalRes = preset.stats.findIndex((s) => isStat(s) && s.tradeId.some((id) => /pseudo_total_elemental_resistance$/.test(id)));
   if (preset.socketColors) {
     const c = preset.socketColors.count;
@@ -284,6 +290,7 @@ function applyEdits(preset, edits) {
     if (id === 'base' && f.searchRelaxed) f.searchRelaxed.disabled = !!e.enabled;
     else if (id === 'corrupted' && f.corrupted) f.corrupted.exact = !!e.enabled;
     else if (id === 'sockets' && preset.socketColors) preset.socketColors.enabled = !!e.enabled;
+    else if (id === 'unidentified' && f.unidentified) f.unidentified.disabled = !e.enabled;
     else if (id.startsWith('influence:')) {
       const inf = (f.influences || [])[Number(id.split(':')[1])];
       if (inf) inf.disabled = !e.enabled;

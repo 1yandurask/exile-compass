@@ -285,6 +285,50 @@
     sel.value = s.league;
   }
 
+  // Неопознанный уник: карточки с картинкой и именем, клик — поиск этого уника
+  let pickId = null;
+  function renderPick(s) {
+    const list = s.pick || [];
+    $('pick').hidden = !list.length;
+    if (!list.length) { pickId = null; return; }
+    const filter = $('pickFilter');
+    if (pickId !== s.checkId) { pickId = s.checkId; filter.value = ''; }
+    filter.hidden = list.length <= 12;
+    $('pickTitle').textContent = `Which unique is it? ${list.length} can drop on this base`;
+    const q = filter.value.trim().toLowerCase();
+    const shown = list.filter((u) => !q || u.name.toLowerCase().includes(q));
+    $('pickEmpty').hidden = shown.length > 0;
+    $('pickGrid').replaceChildren(...shown.map((u) => {
+      const b = el('button', 'pick-card');
+      b.type = 'button';
+      b.title = `Check the price of ${u.name}`;
+      const art = el('span', 'pick-art');
+      if (u.icon) {
+        const img = el('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.src = u.icon;
+        img.onerror = () => { art.classList.add('no-art'); img.remove(); };
+        art.append(img);
+      } else art.classList.add('no-art');
+      b.append(art, el('span', 'pick-name', u.name));
+      if (u.replica) b.append(el('span', 'pick-tag', 'Replica'));
+      b.onclick = async () => {
+        for (const x of $('pickGrid').children) x.disabled = true;
+        try { render(await api.pickUnique(u.name)); } catch (e) { $('error').hidden = false; $('error').textContent = e.message; for (const x of $('pickGrid').children) x.disabled = false; }
+      };
+      return b;
+    }));
+  }
+  $('pickFilter').oninput = () => renderPick(state);
+  $('pickFilter').onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    const first = $('pickGrid').querySelector('.pick-card');
+    if (first && $('pickGrid').children.length === 1) first.click();
+  };
+  $('changeUnique').onclick = async () => render(await api.changeUnique());
+
   function render(s, keepEdits) {
     state = s;
     if (!keepEdits) edits = {};
@@ -302,11 +346,13 @@
       $('unknown').hidden = !it.unknown?.length;
       $('unknown').textContent = it.unknown?.length ? `Not searchable: ${it.unknown.join('; ')}` : '';
     }
+    $('uniqueNote').hidden = !(s.unique && s.unique.choices > 1);
+    renderPick(s);
     $('error').hidden = !s.error;
     $('error').textContent = s.error || '';
     const chips = s.chips || [];
     $('filters').hidden = !chips.length;
-    $('actions').hidden = !chips.length && !it;
+    $('actions').hidden = (!chips.length && !it) || !!s.pick?.length;
     $('itemChips').replaceChildren(...chips.filter((c) => c.kind === 'item').map(renderItemChip));
     renderStats(chips.filter((c) => c.kind === 'stat'), s.checkId);
     renderListings(s.result);

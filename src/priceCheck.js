@@ -10,6 +10,7 @@ const core = require('../lib/core');
 const rules = require('./rules');
 const { TradeClient, RateLimitError, convert, tradeSiteUrl, CURRENCY_SHORT } = require('./trade');
 const { withTimeout } = require('./store');
+const { uniqueIndex, isUnidUnique, resolveUnique } = require('./uniques');
 
 // То, что продаётся через обменник у NPC (Currency Exchange), а не на сайте: валюта,
 // гадальные карты и прочие складываемые предметы без своей категории (фрагменты, скарабеи…)
@@ -60,10 +61,9 @@ class PriceCheck {
 
   ensureCore() {
     if (this.coreReady) return;
-    core.init(
-      fs.readFileSync(path.join(this.o.dataDir, 'en', 'items.ndjson'), 'utf8'),
-      fs.readFileSync(path.join(this.o.dataDir, 'en', 'stats.ndjson'), 'utf8'),
-    );
+    const items = fs.readFileSync(path.join(this.o.dataDir, 'en', 'items.ndjson'), 'utf8');
+    core.init(items, fs.readFileSync(path.join(this.o.dataDir, 'en', 'stats.ndjson'), 'utf8'));
+    this.uniques = uniqueIndex(items);
     this.coreReady = true;
   }
 
@@ -155,7 +155,9 @@ class PriceCheck {
           : 'Could not copy the item from the game. If the game runs as administrator, run Exile Compass as administrator too.' });
         return;
       }
-      const text = await this.readClipboardChange('');
+      let text = await this.readClipboardChange('');
+      // Неопознанные предметы игра по Ctrl+Alt+C не копирует — пробуем обычный Ctrl+C
+      if (!text && (await this.o.gameKeys.copyItemPlain()) === 'OK') text = await this.readClipboardChange('');
       clipboard.writeText(before); // вернуть то, что было в буфере
       if (!text) { this.show({ error: 'No item under the cursor. Hover an item in the game and press the key again.' }); return; }
       await this.checkText(text);
@@ -191,6 +193,41 @@ class PriceCheck {
       this.show({ error: `${item.info.name} is traded at the Currency Exchange, not on the trade site.`, title: item.info.name });
       return this.view();
     }
+    // Неопознанный уник: сначала спросить, какой это уник (как в Awakened PoE Trade).
+    // Один вариант на этой базе — выбираем сами.
+    if (isUnidUnique(item)) {
+      const list = this.uniques?.get(item.info.refName) || [];
+      if (list.length === 1) return this.start(resolveUnique(item, list[0]), { text, pick: list });
+      if (list.length > 1) {
+        this.current = { text, unid: item, pick: list, checkId: ++this.checks };
+        this.show({});
+        return this.view();
+      }
+    }
+    return this.start(item, { text });
+  }
+
+  // Выбрали уник в окне — разбираем текст заново и ищем как этот уник
+  pickUnique(name) {
+    const c = this.current;
+    const u = c?.pick?.find((x) => x.name === name);
+    if (!u) throw new Error('Unknown unique');
+    const parsed = core.parseClipboard(c.text);
+    if (!parsed.isOk()) throw new Error('Could not read this item');
+    return this.start(resolveUnique(parsed.value, u), { text: c.text, pick: c.pick });
+  }
+
+  // «Не тот уник» — снова список
+  changeUnique() {
+    const c = this.current;
+    if (!c?.pick || c.pick.length < 2) return this.view();
+    const parsed = core.parseClipboard(c.text);
+    this.current = { text: c.text, unid: parsed.isOk() ? parsed.value : c.item, pick: c.pick, checkId: ++this.checks };
+    this.push();
+    return this.view();
+  }
+
+  start(item, { text, pick } = {}) {
     let preset;
     try {
       preset = rules.presetFor(core, item, {
@@ -208,13 +245,15 @@ class PriceCheck {
       this.show({ error: 'The price checker cannot search for this item.' });
       return this.view();
     }
-    this.current = { item, preset, body: null, result: null, error: '', checkId: ++this.checks };
+    this.current = { item, preset, text, pick, body: null, result: null, error: '', checkId: ++this.checks };
     this.show({});
     return this.search({});
   }
 
   // Имя и база из текста предмета: строки сразу после «Rarity: …» до первого «--------»
   static itemTitle(item) {
+    // Неопознанный уник, который выбрали в списке: в тексте только база
+    if (item.isUnidentified && item.info?.unique && item.uniqueBase) return { name: item.info.name, base: item.uniqueBase.name };
     const lines = String(item.rawText || '').split(/\r?\n/);
     const i = lines.findIndex((l) => l.startsWith('Rarity: '));
     const head = [];
@@ -245,9 +284,19 @@ class PriceCheck {
       waitMs: this.client.waitMs(),
     };
     const c = this.current;
+    if (c?.pick && !c.preset) {
+      const it = c.unid;
+      return {
+        ...base,
+        item: { name: it?.info?.name || '', base: 'Unidentified unique', rarity: 'Unique', category: it?.category, itemLevel: it?.itemLevel ?? null, highlights: [], unknown: [] },
+        pick: c.pick.map((u) => ({ name: u.name, icon: u.icon, replica: u.replica })),
+        checkId: c.checkId,
+      };
+    }
     if (!c?.preset) return base;
     return {
       ...base,
+      unique: c.pick && c.item.isUnidentified ? { name: c.item.info.name, choices: c.pick.length } : null,
       item: PriceCheck.header(c.item),
       chips: rules.chipsFor(c.item, c.preset),
       result: c.result,
@@ -311,7 +360,7 @@ class PriceCheck {
 
   // Открыть последнюю проверку снова (кнопка в главном окне)
   reopen() {
-    if (this.current?.preset) this.show({});
+    if (this.current?.preset || this.current?.pick) this.show({});
   }
 
   // ------------------------------------------------------------ окно
@@ -379,7 +428,7 @@ class PriceCheck {
 
   push(extra = {}) {
     if (!this.win || this.win.isDestroyed()) return;
-    const v = this.current?.preset ? this.view() : { ...this.view(), error: this.current?.error || '', item: null, chips: [] };
+    const v = this.current?.preset || this.current?.pick ? this.view() : { ...this.view(), error: this.current?.error || '', item: null, chips: [] };
     this.win.webContents.send('price', { ...v, ...extra, wait: this.current?.wait || 0 });
   }
 
@@ -403,6 +452,8 @@ class PriceCheck {
     handle('price:search', (_e, edits) => this.search(edits || {}));
     handle('price:league', (_e, id) => this.changeLeague(id));
     handle('price:open', () => this.openTradeSite());
+    handle('price:pickUnique', (_e, name) => this.pickUnique(String(name)));
+    handle('price:changeUnique', () => this.changeUnique());
     handle('price:close', () => this.hide());
     handle('price:panel', (_e, r) => this.watchPanel(r));
     handle('price:hover', (_e, over) => this.hover(!!over));

@@ -39,6 +39,7 @@ Hover an item, press a key, see what it sells for.
 - 🛡️ **Resistances added up** — fire, cold and lightning in one total (hybrids and crafted ones included); a small button opens the single ones, even those the item doesn't have.
 - 🏹 **Weapons at a glance** — physical and elemental DPS next to the name, extra arrows and +gem levels.
 - 💎 **Gems** — level, quality and corruption of every listing.
+- ❔ **Unidentified uniques** — first pick which unique it is from the uniques of that base, with their pictures; then the price of that unique. **Unidentified only** narrows the search to unidentified listings.
 - 🔴 **Socket colours** — one chip with the item's sockets; switch it on to search for the same colours.
 - ❎ **Out of the way** — click anywhere in the game to close it; the click still reaches the game.
 

@@ -54,13 +54,14 @@ globalThis.__priceCheckFetch = async (url, init = {}) => {
 // Поддельный PowerShell: на COPY кладёт в буфер текст предмета
 let itemText = fs.readFileSync(path.join(__dirname, 'items', 'rare-body.txt'), 'utf8');
 let copyAnswer = 'OK';
+let advancedCopyFails = false; // неопознанные: игра не копирует по Ctrl+Alt+C, только по Ctrl+C
 const helperCmds = [];
 let helper = null;
 globalThis.__priceCheckSpawn = () => {
   const p = new EventEmitter();
   helper = p;
   p.stdout = new EventEmitter();
-  p.stdin = { write: (s) => { helperCmds.push(s.trim()); if (s.trim() === 'FOCUS') setTimeout(() => p.stdout.emit('data', 'OK\n'), 2); if (s.trim() === 'COPY') { if (copyAnswer === 'OK') clip = itemText; setTimeout(() => p.stdout.emit('data', `${copyAnswer}\n`), 5); } }, end() {} };
+  p.stdin = { write: (s) => { helperCmds.push(s.trim()); if (s.trim() === 'FOCUS') setTimeout(() => p.stdout.emit('data', 'OK\n'), 2); if (s.trim() === 'COPY') { if (copyAnswer === 'OK' && !advancedCopyFails) clip = itemText; setTimeout(() => p.stdout.emit('data', `${copyAnswer}\n`), 5); } if (s.trim() === 'COPYPLAIN') { if (copyAnswer === 'OK') clip = itemText; setTimeout(() => p.stdout.emit('data', `${copyAnswer}\n`), 5); } }, end() {} };
   p.kill = () => {};
   setTimeout(() => p.stdout.emit('data', 'READY\n'), 1);
   return p;
@@ -239,6 +240,44 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   copyAnswer = 'OK';
   itemText = fs.readFileSync(path.join(__dirname, 'items', 'rare-body.txt'), 'utf8');
   console.log('✓ Ctrl+D при открытом окне — новый предмет; повторная проверка; без игры старое не показывается');
+
+  // Неопознанный уник: сначала выбор уника (с картинками), поиска до выбора нет
+  itemText = fs.readFileSync(path.join(__dirname, 'items', 'unid-unique-belt.txt'), 'utf8');
+  advancedCopyFails = true;
+  await wait(5200);
+  const searches = () => requests.filter((r) => r.url.includes('/api/trade/search/'));
+  const nSearch = searches().length;
+  shortcuts.get('Ctrl+D')();
+  await wait(1300); // Ctrl+Alt+C ждём 0,7 с, потом Ctrl+C
+  let pv = lastPrice();
+  assert.ok(pw.visible);
+  assert.ok(pv.pick.length > 5 && pv.pick.some((u) => u.name === 'Headhunter' && /^https:\/\/web\.poecdn\.com\//.test(u.icon)), 'список уников базы с картинками');
+  assert.equal(pv.item.name, 'Leather Belt');
+  assert.ok(!pv.chips?.length, 'плашек пока нет');
+  assert.ok(helperCmds.includes('COPYPLAIN'), 'Ctrl+Alt+C не скопировал — скопировано обычным Ctrl+C');
+  advancedCopyFails = false;
+  assert.equal(searches().length, nSearch, 'до выбора на сайт не ходим');
+  await wait((pv.waitMs || 0) + 300); // лимит сайта от прошлых проверок
+  pv = await call('price:pickUnique', 'Headhunter');
+  assert.equal(pv.item.name, 'Headhunter');
+  assert.equal(pv.item.base, 'Leather Belt');
+  assert.equal(pv.unique.name, 'Headhunter');
+  assert.ok(!pv.pick, 'после выбора — обычное окно цены');
+  assert.equal(searches().at(-1).body.query.name, 'Headhunter');
+  assert.equal(searches().at(-1).body.query.type, 'Leather Belt');
+  pv = await call('price:changeUnique');
+  assert.ok(pv.pick.length > 5 && !pv.chips, '«Choose another» — снова список');
+  await assert.rejects(() => call('price:pickUnique', 'Mageblood'), /Unknown unique/, 'чужой уник не выбрать');
+  // На базе один уник — выбираем сами
+  itemText = fs.readFileSync(path.join(__dirname, 'items', 'unid-unique-single.txt'), 'utf8');
+  await wait(5200);
+  shortcuts.get('Ctrl+D')();
+  await wait(400);
+  pv = lastPrice();
+  assert.equal(pv.item.name, "Shavronne's Wrappings", 'единственный уник базы — без вопроса');
+  assert.ok(!pv.pick);
+  itemText = fs.readFileSync(path.join(__dirname, 'items', 'rare-body.txt'), 'utf8');
+  console.log('✓ неопознанный уник: выбор из списка с картинками, «Choose another», единственный — сам');
 
   // Клик в игру мимо окна: окно теряет фокус и закрывается
   await wait(5200);

@@ -191,3 +191,46 @@ test('цвета гнёзд: плашка рядом с corrupted, выключ�
   assert.equal(R.socketColors({ rawText: 'Sockets: A A\n' }), null, 'только гнёзда бездны — без плашки');
   assert.equal(load('gem.txt').chips.find((x) => x.id === 'sockets'), undefined);
 });
+
+test('неопознанный уник: список уников этой базы с картинками, выбранный ищется по имени и базе', () => {
+  const U = require('../src/uniques');
+  const idx = U.uniqueIndex(fs.readFileSync(path.join(D, 'items.ndjson'), 'utf8'));
+  const r = core.parseClipboard(fs.readFileSync(path.join(__dirname, 'items', 'unid-unique-belt.txt'), 'utf8'));
+  assert.ok(r.isOk());
+  const item = r.value;
+  assert.ok(U.isUnidUnique(item));
+  const list = idx.get(item.info.refName);
+  assert.ok(list.some((u) => u.name === 'Headhunter'));
+  assert.ok(list.every((u) => /^https:\/\/web\.poecdn\.com\//.test(u.icon)), 'у каждого картинка');
+  assert.equal(list.at(-1).name, 'Replica Headhunter', 'реплики в конце');
+  assert.equal(new Set(list.map((u) => u.name)).size, list.length, 'без повторов');
+
+  U.resolveUnique(item, list.find((u) => u.name === 'Headhunter'));
+  assert.ok(!U.isUnidUnique(item));
+  const preset = R.presetFor(core, item, OPTS);
+  R.applyDefaults(item, preset);
+  const q = () => R.finalizeRequest(core.createTradeRequest(preset.filters, preset.stats), preset, 'securable').query;
+  assert.equal(q().name, 'Headhunter');
+  assert.equal(q().type, 'Leather Belt');
+  assert.equal(q().filters?.misc_filters?.filters?.identified, undefined, 'по умолчанию — и опознанные лоты');
+  const chip = R.chipsFor(item, preset).find((c) => c.id === 'unidentified');
+  assert.equal(chip.enabled, false);
+  R.applyEdits(preset, { unidentified: { enabled: true } });
+  assert.deepEqual(q().filters.misc_filters.filters.identified, { option: 'false' }, 'плашка — только неопознанные');
+});
+
+test('опознанный уник и редкий предмет — без выбора уника', () => {
+  const U = require('../src/uniques');
+  assert.ok(!U.isUnidUnique(load('unique-body.txt').item));
+  assert.ok(!U.isUnidUnique(load('rare-body.txt').item));
+  assert.equal(load('unique-body.txt').chips.find((c) => c.id === 'unidentified'), undefined);
+});
+
+test('неопознанный Cloth Belt из игры (текст от пользователя): есть выбор уника', () => {
+  const U = require('../src/uniques');
+  const idx = U.uniqueIndex(fs.readFileSync(path.join(D, 'items.ndjson'), 'utf8'));
+  const r = core.parseClipboard(fs.readFileSync(path.join(__dirname, 'items', 'unid-unique-cloth.txt'), 'utf8'));
+  assert.ok(r.isOk() && U.isUnidUnique(r.value));
+  const names = idx.get(r.value.info.refName).map((u) => u.name);
+  assert.ok(names.includes('Soul Tether') && names.includes('Perandus Blazon') && names.length > 10);
+});

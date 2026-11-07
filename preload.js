@@ -78,6 +78,8 @@ contextBridge.exposeInMainWorld('pc', {
   search: (edits) => call('price:search', edits),
   setLeague: (id) => call('price:league', id),
   openTrade: () => call('price:open'),
+  pickUnique: (name) => call('price:pickUnique', name),
+  changeUnique: () => call('price:changeUnique'),
   close: () => call('price:close'),
   panel: (rect) => call('price:panel', rect),
   hover: (over) => call('price:hover', over),
